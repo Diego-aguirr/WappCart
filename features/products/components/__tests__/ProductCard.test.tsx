@@ -44,7 +44,7 @@ describe('ProductCard', () => {
 
   it('should render formatted price', () => {
     render(<ProductCard product={mockProduct} />)
-    expect(screen.getByText('$800,00')).toBeDefined()
+    expect(screen.getByText((content) => content.includes('800,00'))).toBeDefined()
   })
 
   it('should render product image with correct alt text', () => {

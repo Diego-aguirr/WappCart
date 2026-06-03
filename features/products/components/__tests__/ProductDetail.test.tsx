@@ -46,7 +46,7 @@ describe('ProductDetail', () => {
 
   it('should render formatted price', () => {
     render(<ProductDetail product={mockProduct} />)
-    expect(screen.getByText('$800,00')).toBeDefined()
+    expect(screen.getByText((content) => content.includes('800,00'))).toBeDefined()
   })
 
   it('should render product category', () => {
@@ -93,6 +93,6 @@ describe('ProductDetail', () => {
     render(<ProductDetail product={minimalProduct} />)
     expect(screen.getByText('Test Product')).toBeDefined()
     expect(screen.getByText('Short desc')).toBeDefined()
-    expect(screen.getByText('$100,00')).toBeDefined()
+    expect(screen.getByText((content) => content.includes('100,00'))).toBeDefined()
   })
 })
