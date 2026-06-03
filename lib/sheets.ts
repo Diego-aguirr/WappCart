@@ -1,91 +1,122 @@
 import type { Product, Category } from './types'
 
-// Mock data — reemplazar con Google Sheets real cuando tengas credenciales
-const mockProducts: Product[] = [
-  {
-    id: '1',
-    name: 'Empanada de Carne',
-    slug: 'empanada-de-carne',
-    category: 'empanadas',
-    description: 'Empanada criolla rellena de carne cortada a cuchillo, cebolla, huevo y aceitunas.',
-    price: 800,
-    image: 'https://images.unsplash.com/photo-1604467707321-70d009801bf4?w=400',
-    available: true,
-  },
-  {
-    id: '2',
-    name: 'Empanada de Jamón y Queso',
-    slug: 'empanada-de-jamon-y-queso',
-    category: 'empanadas',
-    description: 'Empanada rellena de jamón cocido y queso cremoso.',
-    price: 800,
-    image: 'https://images.unsplash.com/photo-1604467707321-70d009801bf4?w=400',
-    available: true,
-  },
-  {
-    id: '3',
-    name: 'Milanesa Napolitana',
-    slug: 'milanesa-napolitana',
-    category: 'milanesas',
-    description: 'Milanesa de ternera con salsa de tomate, jamón y queso gratinado.',
-    price: 3500,
-    image: 'https://images.unsplash.com/photo-1604467707321-70d009801bf4?w=400',
-    available: true,
-  },
-  {
-    id: '4',
-    name: 'Pizza Muzzarella',
-    slug: 'pizza-muzzarella',
-    category: 'pizzas',
-    description: 'Pizza con salsa de tomate, muzzarella y orégano.',
-    price: 4000,
-    image: 'https://images.unsplash.com/photo-1604467707321-70d009801bf4?w=400',
-    available: true,
-  },
-  {
-    id: '5',
-    name: 'Pizza Fugazzeta',
-    slug: 'pizza-fugazzeta',
-    category: 'pizzas',
-    description: 'Pizza rellena de muzzarella con cebolla caramelizada.',
-    price: 4500,
-    image: 'https://images.unsplash.com/photo-1604467707321-70d009801bf4?w=400',
-    available: true,
-  },
-  {
-    id: '6',
-    name: 'Hamburguesa Clásica',
-    slug: 'hamburguesa-clasica',
-    category: 'hamburguesas',
-    description: 'Hamburguesa de carne con lechuga, tomate, queso y salsa especial.',
-    price: 3000,
-    image: 'https://images.unsplash.com/photo-1604467707321-70d009801bf4?w=400',
-    available: false,
-  },
-]
+const SHEET_ID = '18EoDMw922wrOVGS-i7vbgIUv3jLXwKS9VmYt4SUlhCY'
+const SHEET_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv`
 
-const mockCategories: Category[] = [
-  { id: '1', name: 'Empanadas', slug: 'empanadas' },
-  { id: '2', name: 'Milanesas', slug: 'milanesas' },
-  { id: '3', name: 'Pizzas', slug: 'pizzas' },
-  { id: '4', name: 'Hamburguesas', slug: 'hamburguesas' },
-]
+type SheetRow = {
+  id: string
+  name: string
+  category: string
+  descripcion: string
+  price: string
+  image: string
+  avaible: string
+}
 
-// Funciones que leen de Google Sheets (o mock si no hay credenciales)
+function parseCsvLine(line: string): string[] {
+  const result: string[] = []
+  let current = ''
+  let inQuotes = false
+
+  for (let i = 0; i < line.length; i++) {
+    const char = line[i]
+    if (char === '"') {
+      inQuotes = !inQuotes
+    } else if (char === ',' && !inQuotes) {
+      result.push(current.trim())
+      current = ''
+    } else {
+      current += char
+    }
+  }
+  result.push(current.trim())
+  return result
+}
+
+function parseCsv(csv: string): SheetRow[] {
+  const lines = csv.split('\n').filter((line) => line.trim())
+  if (lines.length < 2) return []
+
+  const headers = parseCsvLine(lines[0])
+  const rows: SheetRow[] = []
+
+  for (let i = 1; i < lines.length; i++) {
+    const values = parseCsvLine(lines[i])
+    const row: Record<string, string> = {}
+    headers.forEach((header, index) => {
+      row[header] = values[index] || ''
+    })
+    rows.push(row as unknown as SheetRow)
+  }
+
+  return rows
+}
+
+function slugify(text: string): string {
+  return text
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/(^-|-$)/g, '')
+}
+
+function mapRowToProduct(row: SheetRow): Product {
+  return {
+    id: row.id,
+    name: row.name.replace(/,\s*$/, ''), // Limpiar coma final
+    slug: slugify(row.name),
+    category: row.category.toLowerCase(),
+    description: row.descripcion,
+    price: parseInt(row.price, 10) || 0,
+    image: row.image,
+    available: row.avaible.toUpperCase() === 'TRUE',
+  }
+}
+
 export async function getProducts(): Promise<Product[]> {
-  // TODO: Cuando tengas credenciales, acá lees de Google Sheets
-  return mockProducts
+  try {
+    const response = await fetch(SHEET_URL, {
+      next: { revalidate: 300 }, // Cache 5 minutos
+    })
+
+    if (!response.ok) {
+      console.error('Error fetching sheet:', response.status)
+      return []
+    }
+
+    const csv = await response.text()
+    const rows = parseCsv(csv)
+    return rows.map(mapRowToProduct)
+  } catch (error) {
+    console.error('Error parsing sheet data:', error)
+    return []
+  }
 }
 
 export async function getProductBySlug(slug: string): Promise<Product | null> {
-  const product = mockProducts.find((p) => p.slug === slug)
-  return product ?? null
+  const products = await getProducts()
+  return products.find((p) => p.slug === slug) ?? null
 }
 
 export async function getCategories(): Promise<Category[]> {
-  return mockCategories
+  const products = await getProducts()
+  const categoryMap = new Map<string, string>()
+
+  products.forEach((product) => {
+    if (!categoryMap.has(product.category)) {
+      categoryMap.set(product.category, product.category)
+    }
+  })
+
+  return Array.from(categoryMap.entries()).map(([slug, name]) => ({
+    id: slug,
+    name: name.charAt(0).toUpperCase() + name.slice(1),
+    slug,
+  }))
 }
 
 export async function getProductsByCategory(categorySlug: string): Promise<Product[]> {
-  return mockProducts.filter((p) => p.category === categorySlug)
+  const products = await getProducts()
+  return products.filter((p) => p.category === categorySlug)
 }
