@@ -1,0 +1,29 @@
+# dependencies
+node_modules
+.pnpm-store
+
+# next.js
+.next/
+out/
+
+# production
+build
+
+# env
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# vercel
+.vercel
+
+# sdd artifacts (local only)
+openspec/
+.atl/
+
+# misc
+.DS_Store
+*.tsbuildinfo
+next-env.d.ts
