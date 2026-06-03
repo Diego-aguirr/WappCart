@@ -1,5 +1,4 @@
 import type { CartItem } from './types'
-import { env } from './env'
 
 export function generateWhatsAppMessage(
   customerName: string,
@@ -34,5 +33,6 @@ export function generateWhatsAppMessage(
 
 export function getWhatsAppUrl(message: string): string {
   const encoded = encodeURIComponent(message)
-  return `https://wa.me/${env.WHATSAPP_NUMBER}?text=${encoded}`
+  const phone = process.env.WHATSAPP_NUMBER || '5491123456789'
+  return `https://wa.me/${phone}?text=${encoded}`
 }
