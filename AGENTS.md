@@ -1,463 +1,601 @@
-# Agent.md
+# WappCart - Agent.md
 
-## Quick Reference
+## Project Overview
 
-| Stack | Choice |
-|-------|--------|
-| Framework | Next.js 16 (App Router) |
-| UI | React 19, Tailwind CSS 4 |
-| Language | TypeScript 5+ (strict) |
-| Package Manager | pnpm |
-| CMS | Google Sheets (server-side only) |
-| Checkout | WhatsApp redirect |
-| Validation | Zod |
-| Testing | Vitest + React Testing Library |
+WappCart is a WhatsApp-first food ordering platform built for small businesses.
+
+Examples:
+
+- Pizzerias
+- Burger Shops
+- Fast Food Restaurants
+- Bakeries
+- Empanada Stores
+
+Customers browse products, add items to a cart, complete delivery information, and place orders directly through WhatsApp.
+
+Business owners manage products through Google Sheets.
+
+No admin panel.
+
+No authentication.
+
+No payment gateway.
+
+Google Sheets acts as the CMS.
+
+WhatsApp acts as the checkout system.
 
 ---
 
-## Architecture
+# Tech Stack
 
-**Pattern**: Vertical Slice Architecture + Server Components First
+| Category        | Technology                     |
+| --------------- | ------------------------------ |
+| Framework       | Next.js 16                     |
+| UI              | React 19                       |
+| Styling         | Tailwind CSS 4                 |
+| Language        | TypeScript 5+                  |
+| Validation      | Zod                            |
+| Package Manager | pnpm                           |
+| Testing         | Vitest + React Testing Library |
+| CMS             | Google Sheets                  |
+| Checkout        | WhatsApp                       |
 
-### Directory Structure
+---
 
-```
-app/
-├── layout.tsx              # Root layout (required)
-├── page.tsx                # Home page
-├── loading.tsx             # Global loading UI
-├── error.tsx               # Global error boundary
-├── not-found.tsx           # Global 404
-├── proxy.ts                # Next.js 16 middleware (was middleware.ts)
-├── sitemap.ts              # SEO sitemap generation
-├── (store)/                # Route group — no URL impact
-│   ├── page.tsx            # Store home
-│   ├── menu/
-│   │   └── [slug]/
-│   │       └── page.tsx    # Product detail
-│   └── checkout/
-│       └── page.tsx
-├── actions/
-│   ├── cart.ts             # Cart Server Actions
-│   └── order.ts            # Order Server Actions
-└── api/                    # Route Handlers (only if needed)
+# Architecture
+
+## Architecture Name
+
+Vertical Slice Architecture + Server Components First
+
+## Core Principles
+
+### Server First
+
+Default to Server Components.
+
+Use Client Components only when:
+
+- useState is required
+- Browser APIs are required
+- User interaction requires hydration
+
+### Feature First
+
+Organize code by business feature.
+
+Good:
 
 features/
-├── products/
-│   ├── components/
-│   ├── services/
-│   ├── types/
-│   └── utils/
-├── cart/
-│   ├── components/
-│   ├── hooks/
-│   ├── types/
-│   └── utils/
-├── checkout/
-│   ├── actions/
-│   ├── components/
-│   └── validation/
-└── categories/
-    ├── components/
-    └── services/
+├── products
+├── categories
+├── cart
+└── checkout
+
+Bad:
 
 components/
-├── ui/                     # Primitives (Button, Input, Card)
-├── layout/                 # Header, Footer, Container
-└── shared/                 # Cross-feature components
+hooks/
+services/
+utils/
+
+### Clean Boundaries
+
+Flow:
+
+UI
+↓
+Feature
+↓
+Service
+↓
+External Source
+
+Never access Google Sheets directly from UI components.
+
+### Minimal Client JavaScript
+
+Hydrate only interactive sections:
+
+- Cart
+- Mobile Navigation
+- Drawer Components
+
+Everything else should remain server-rendered.
+
+---
+
+# Directory Structure
+
+src/
+
+app/
+├── layout.tsx
+├── page.tsx
+├── loading.tsx
+├── error.tsx
+├── not-found.tsx
+├── sitemap.ts
+├── robots.ts
+├── proxy.ts
+│
+├── checkout/
+│ └── page.tsx
+│
+└── actions/
+├── cart.ts
+└── order.ts
+
+features/
+
+├── products/
+│ ├── components/
+│ ├── services/
+│ ├── mappers/
+│ ├── types/
+│ └── utils/
+│
+├── categories/
+│ ├── components/
+│ └── services/
+│
+├── cart/
+│ ├── components/
+│ ├── provider/
+│ ├── hooks/
+│ ├── types/
+│ └── utils/
+│
+└── checkout/
+├── components/
+├── validation/
+└── utils/
+
+components/
+
+├── ui/
+├── layout/
+└── shared/
 
 lib/
-├── google-sheets/          # Sheets API client
-├── whatsapp/               # Message builder
-├── cache/                  # Cache utilities
-└── env/                    # Validated env vars
 
-types/                      # Shared domain types
-config/                     # Constants, site config
-public/                     # Static assets
-```
+├── sheets/
+├── whatsapp/
+├── cache/
+└── env/
 
-### Principles
+schemas/
 
-1. **Server First** — default to Server Components, add `'use client'` only when needed
-2. **Feature-oriented** — group by domain, not by technical layer
-3. **Minimal client JS** — every `'use client'` is a conscious decision
-4. **Type safety** — Zod schemas at boundaries, TypeScript everywhere else
+├── product.ts
+├── category.ts
+├── order.ts
+└── env.ts
+
+config/
+
+├── site.ts
+└── features.ts
+
+types/
+
+public/
 
 ---
 
-## Next.js 16 Rules
+# Google Sheets CMS
 
-### Async APIs (BREAKING CHANGE from v14)
+Google Sheets is the single source of truth.
 
-`params`, `searchParams`, `cookies()`, and `headers()` are now **async**. Always `await` them.
+Columns:
 
-```typescript
-// Pages and Layouts
-type Props = { params: Promise<{ slug: string }> }
+- id
+- name
+- category
+- description
+- price
+- image
+- available
 
-export default async function Page({ params }: Props) {
-  const { slug } = await params
-}
+Example:
 
-// Route Handlers
-export async function GET(
-  request: Request,
-  { params }: { params: Promise<{ id: string }> }
-) {
-  const { id } = await params
-}
+| id  | name             | category | price |
+| --- | ---------------- | -------- | ----- |
+| 1   | Pizza Muzzarella | Pizzas   | 12000 |
 
-// SearchParams
-type Props = {
-  params: Promise<{ slug: string }>
-  searchParams: Promise<{ query?: string }>
-}
+All Google Sheets requests must run on the server.
 
-export default async function Page({ params, searchParams }: Props) {
-  const { slug } = await params
-  const { query } = await searchParams
-}
+Never expose credentials to the browser.
 
-// Cookies and Headers
-import { cookies, headers } from 'next/headers'
+Map sheet rows into typed domain objects before rendering.
+
+---
+
+# Next.js 16 Rules
+
+## Server Components
+
+Always prefer Server Components.
+
+Example:
 
 export default async function Page() {
-  const cookieStore = await cookies()
-  const headersList = await headers()
-}
-```
-
-### Middleware → Proxy (v16 rename)
-
-```typescript
-// proxy.ts (root of project)
-import { NextResponse } from 'next/server'
-import type { NextRequest } from 'next/server'
-
-export function proxy(request: NextRequest) {
-  return NextResponse.next()
+const products = await getProducts()
+return <ProductsGrid products={products} />
 }
 
-export const proxyConfig = {
-  matcher: ['/api/:path*'],
-}
-```
+Avoid "use client" unless absolutely necessary.
 
-### Directives
+---
 
-| Directive | Purpose | When to use |
-|-----------|---------|-------------|
-| `'use client'` | Client Component | State, browser APIs, event handlers |
-| `'use server'` | Server Action | Mutations, form handling |
-| `'use cache'` | Cache Component | Data that rarely changes (requires config) |
+## Server Actions
 
-### Data Fetching Decision Tree
+Use Server Actions for:
 
-```
-Need data?
-├── Server Component (read)?
-│   └── Fetch directly — no API needed
-├── Client Component (mutation)?
-│   └── Server Action
-├── Client Component (read)?
-│   └── Pass from Server Component OR Route Handler
-├── External API / webhook?
-│   └── Route Handler
-└── Mobile app / external client?
-    └── Route Handler
-```
+- Checkout
+- Forms
+- Mutations
 
-**Rule**: Never fetch from a Route Handler when a Server Component can do it directly.
+Prefer Server Actions over Route Handlers.
 
-### Avoiding Data Waterfalls
+---
 
-```typescript
-// BAD: Sequential
-const user = await getUser()      // Wait
-const posts = await getPosts()    // Then wait
-const comments = await getComments() // Then wait
+## Route Handlers
 
-// GOOD: Parallel
-const [user, posts, comments] = await Promise.all([
-  getUser(),
-  getPosts(),
-  getComments(),
+Only create Route Handlers when:
+
+- Webhooks are required
+- Public APIs are required
+- External integrations require them
+
+Never create API routes for internal application logic.
+
+---
+
+## Data Fetching
+
+Priority:
+
+1. Server Component
+2. Server Action
+3. Route Handler
+
+Never fetch through an API route when a Server Component can access data directly.
+
+---
+
+## Caching
+
+Products change infrequently.
+
+Use:
+
+export const revalidate = 300
+
+or
+
+unstable_cache()
+
+Default cache duration:
+
+5 minutes.
+
+---
+
+## Parallel Data Fetching
+
+Prefer:
+
+const [products, categories] = await Promise.all([
+getProducts(),
+getCategories(),
 ])
 
-// GOOD: Streaming with Suspense
-<Suspense fallback={<UserSkeleton />}>
-  <UserSection />
-</Suspense>
-<Suspense fallback={<PostsSkeleton />}>
-  <PostsSection />
-</Suspense>
-```
-
-### Error Handling
-
-Every route segment should have:
-
-| File | Purpose |
-|------|---------|
-| `error.tsx` | Catches errors (must be `'use client'`) |
-| `not-found.tsx` | 404 UI |
-| `loading.tsx` | Loading skeleton |
-
-**Critical**: Do NOT wrap `redirect()`, `notFound()`, `forbidden()`, or `unauthorized()` in try-catch. They throw special errors Next.js handles internally.
-
-```typescript
-// BAD
-async function createPost(formData: FormData) {
-  try {
-    const post = await db.post.create({ ... })
-    redirect(`/posts/${post.id}`) // This throws!
-  } catch (error) {
-    // redirect() is caught here — navigation fails!
-    return { error: 'Failed' }
-  }
-}
-
-// GOOD
-async function createPost(formData: FormData) {
-  let post
-  try {
-    post = await db.post.create({ ... })
-  } catch (error) {
-    return { error: 'Failed' }
-  }
-  redirect(`/posts/${post.id}`) // Outside try-catch
-}
-```
-
-### Server Actions Contract
-
-Every Server Action must:
-
-```typescript
-'use server'
-
-import { z } from 'zod'
-import { revalidatePath } from 'next/cache'
-
-const OrderSchema = z.object({
-  name: z.string().min(1).max(100),
-  phone: z.string().regex(/^\+?\d{10,15}$/),
-  address: z.string().min(5).max(200),
-  notes: z.string().max(500).optional(),
-})
-
-export async function submitOrder(formData: FormData) {
-  // 1. Validate
-  const result = OrderSchema.safeParse(Object.fromEntries(formData))
-  if (!result.success) {
-    return { error: result.error.flatten().fieldErrors }
-  }
-
-  // 2. Sanitize
-  const data = {
-    ...result.data,
-    name: result.data.name.trim(),
-    address: result.data.address.trim(),
-  }
-
-  // 3. Process
-  try {
-    await saveOrder(data)
-  } catch (error) {
-    return { error: 'Failed to save order' }
-  }
-
-  // 4. Revalidate (outside try-catch)
-  revalidatePath('/orders')
-}
-```
+Avoid sequential requests.
 
 ---
 
-## TypeScript Rules
+# TypeScript Rules
 
-- **Strict mode** enabled
-- **Never** use `any` — prefer `unknown`
-- Use `type` by default, `interface` only when extension is needed
-- Explicit types for: `Product`, `Category`, `CartItem`, `Order`, `Env`
+Strict mode enabled.
 
-```typescript
-// Domain types
-type Product = {
-  id: string
-  name: string
-  slug: string
-  category: string
-  description: string
-  price: number
-  image: string
-  available: boolean
-}
+Never use:
 
-type CartItem = {
-  product: Product
-  quantity: number
-}
+any
 
-// Env validation (lib/env.ts)
-import { z } from 'zod'
+Prefer:
 
-const envSchema = z.object({
-  GOOGLE_SHEET_ID: z.string().min(1),
-  WHATSAPP_NUMBER: z.string().regex(/^\d{10,15}$/),
-  GOOGLE_SERVICE_ACCOUNT_EMAIL: z.string().email(),
-  GOOGLE_PRIVATE_KEY: z.string().min(1),
-})
+unknown
 
-export const env = envSchema.parse(process.env)
-```
+Use:
+
+type
+
+by default.
+
+Use:
+
+interface
+
+only when extension is required.
 
 ---
 
-## Security Rules
+# Validation Rules
 
-### Environment Variables
+Use Zod at all external boundaries.
 
-- Validate on startup with Zod
-- Never access `process.env` directly in components
-- Use centralized `lib/env.ts` module
-- Never commit `.env`
+Validate:
 
-### Input Validation
+- Environment variables
+- Google Sheets rows
+- Form submissions
+- URL parameters
 
-- Validate **every** user input with Zod
-- Sanitize strings (`.trim()`)
-- Never trust `FormData` — always parse through Zod
-
-### XSS Protection
-
-- Never use `dangerouslySetInnerHTML` unless absolutely necessary
-- If required, sanitize first
-
-### Rate Limiting
-
-Protect checkout submissions. Recommended: Upstash Rate Limit.
+Never trust external data.
 
 ---
 
-## React 19 Rules
+# Security Rules
 
-- **Server Components** by default
-- Add `'use client'` only when:
-  - State is required (`useState`, `useReducer`)
-  - Browser APIs are needed (`window`, `localStorage`)
-  - Event handlers require hydration
-- Keep `'use client'` boundaries as low as possible in the tree
+## Environment Variables
 
----
+Validate all environment variables on startup.
 
-## Google Sheets Integration
+Use a centralized env module.
 
-- Products fetched **server-side only**
-- Never expose Google credentials to the browser
-- Implement cache layer + revalidation strategy
-- Error handling with fallback UI
+Never access process.env directly throughout the application.
+
+Never commit .env files.
 
 ---
 
-## Testing
+## Input Validation
 
-**Runner**: Vitest + React Testing Library
+All form data must:
 
-```bash
-pnpm test          # Run once
-pnpm test:watch    # Watch mode
-```
+Validate
+↓
+Sanitize
+↓
+Process
 
-**Structure**: `src/utils/__tests__/cart.test.ts` (co-locate tests with source)
+Never trust FormData.
 
-**Rules**:
-- Test behavior, not implementation
-- Use `describe` for grouping, `it` for individual cases
-- Test edge cases: empty arrays, missing data, invalid input
-- No `console.log` in tests
+Always validate with Zod.
 
 ---
 
-## Accessibility (WCAG 2.2 AA)
+## XSS Protection
 
-- All images: `alt` text
-- Forms: labels associated with inputs
-- Buttons: accessible names
-- Keyboard navigation required
-- Visible focus states
-- Color contrast: minimum 4.5:1
-- Semantic HTML: `header`, `main`, `nav`, `section`, `article`, `footer`
-- Prefer native HTML before ARIA
+Never use:
+
+dangerouslySetInnerHTML
+
+unless absolutely necessary.
 
 ---
 
-## SEO
+## Rate Limiting
 
-- Every page: `title`, `description`, `canonical` via `generateMetadata()`
-- Generate `sitemap.xml` and `robots.txt`
-- Structured data: JSON-LD (Restaurant, LocalBusiness schemas)
-- Open Graph + Twitter Cards
-- Images: `next/image` with descriptive `alt`
-- URLs: `/menu/pizza-muzzarella` (not `/product?id=123`)
+Protect checkout submissions.
 
----
+Recommended:
 
-## Performance
-
-- **Target**: Core Web Vitals green (LCP, CLS, INP)
-- **Images**: `next/image` always
-- **Code splitting**: `next/dynamic` for heavy components
-- **Streaming**: `Suspense` for slow sections
-- **Caching**: aggressive server-side caching
-- **Bundle**: minimize client JavaScript
+Upstash Rate Limit.
 
 ---
 
-## Tailwind CSS 4
+# Accessibility
 
-- Utility-first approach
-- Extract reusable patterns into components
-- Maintain consistent spacing scale
-- Use design tokens for colors, fonts
-- Avoid massive `className` strings
+Target:
+
+WCAG 2.2 AA
+
+Requirements:
+
+- Keyboard navigation
+- Focus states
+- Semantic HTML
+- Accessible forms
+- Image alt text
+- Proper contrast ratios
+
+Prefer native HTML before ARIA.
 
 ---
 
-## State Management
+# SEO
 
-- **Server state**: prefer server-side fetching
-- **Cart**: React Context + `localStorage` (client-only)
-- **No Redux, no Zustand** unless requirements grow significantly
+Every page must include:
+
+- Title
+- Description
+- Canonical URL
+
+Use:
+
+generateMetadata()
+
+Generate:
+
+- sitemap.xml
+- robots.txt
+
+Use structured data:
+
+- Restaurant Schema
+- LocalBusiness Schema
+
+Use next/image for all images.
+
+Prefer descriptive URLs:
+
+/menu/pizza-muzzarella
+
+Avoid:
+
+/product?id=1
 
 ---
 
-## Code Quality
+# Performance
 
-Required:
-- ESLint
-- TypeScript strict
-- Vitest
-- Prettier (when configured)
+Goals:
+
+- LCP < 2.5s
+- CLS < 0.1
+- INP < 200ms
 
 Rules:
-- No dead code
-- No `console.log` in production
-- No duplicated logic
-- Keep functions small and focused
+
+- Server render whenever possible
+- Minimize hydration
+- Use Suspense when appropriate
+- Use dynamic imports for heavy components
+- Optimize all images
 
 ---
 
-## Golden Rules
+# State Management
 
-1. Server First
-2. Accessibility First
-3. SEO First
-4. Security First
-5. Type Safety First
-6. Minimal Client JavaScript
-7. No Admin Panel
-8. Google Sheets is the CMS
-9. WhatsApp is the checkout
-10. Simplicity over complexity
+Server State:
+
+Server Components
+
+Client State:
+
+Cart only
+
+Implementation:
+
+React Context
+
+- localStorage
+
+Do not introduce:
+
+- Redux
+- MobX
+- Zustand
+
+unless future requirements justify it.
+
+---
+
+# Testing
+
+Tools:
+
+- Vitest
+- React Testing Library
+
+Test:
+
+- Cart calculations
+- Product mapping
+- WhatsApp message generation
+- Validation schemas
+
+Focus on behavior rather than implementation details.
+
+---
+
+# Code Quality
+
+Required:
+
+- ESLint
+- TypeScript Strict
+- Prettier
+
+Rules:
+
+- No dead code
+- No duplicated logic
+- No console.log in production
+- Small focused functions
+- Explicit naming
+
+---
+
+# Product Model
+
+type Product = {
+id: string
+name: string
+slug: string
+category: string
+description: string
+price: number
+image: string
+available: boolean
+}
+
+---
+
+# Category Model
+
+type Category = {
+id: string
+name: string
+slug: string
+}
+
+---
+
+# Order Model
+
+type Order = {
+customerName: string
+phone: string
+address: string
+notes?: string
+products: CartItem[]
+total: number
+}
+
+---
+
+# Checkout Flow
+
+Customer
+↓
+Browse Products
+↓
+Add To Cart
+↓
+Checkout Form
+↓
+Validate
+↓
+Generate WhatsApp Message
+↓
+Redirect To WhatsApp
+
+No database required.
+
+No order persistence required.
+
+WhatsApp is the final destination.
+
+---
+
+# Golden Rules
+
+1. Server First.
+2. Feature First.
+3. Accessibility First.
+4. SEO First.
+5. Security First.
+6. Type Safety First.
+7. Minimal Client JavaScript.
+8. No Admin Panel.
+9. Google Sheets is the CMS.
+10. WhatsApp is the Checkout.
+11. Fetch on the Server whenever possible.
+12. Prefer Server Actions over API Routes.
+13. Simplicity over Complexity.
+14. Build reusable features.
+15. Optimize for maintainability, not cleverness.
