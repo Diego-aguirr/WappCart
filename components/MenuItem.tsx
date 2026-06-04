@@ -1,4 +1,5 @@
-import Image from 'next/image'
+'use client'
+
 import { useCart } from '@/lib/cart-context'
 import type { Product } from '@/lib/types'
 
@@ -14,28 +15,28 @@ export function MenuItem({ product }: { product: Product }) {
   return (
     <div className="flex items-center gap-4 py-4 border-b border-neutral-100 last:border-0">
       {/* Imagen */}
-      <div className="relative w-20 h-20 shrink-0 rounded-lg overflow-hidden bg-neutral-100">
-        <Image
+      <div className="relative w-16 h-16 shrink-0 rounded-xl overflow-hidden bg-neutral-100">
+        <img
           src={product.image || '/Food/logo.png'}
           alt={product.name}
-          fill
-          className="object-cover"
-          sizes="80px"
+          className="w-full h-full object-cover"
         />
       </div>
 
       {/* Info */}
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2">
-          <h3 className="font-semibold text-neutral-900">{product.name}</h3>
+          <h3 className="font-semibold text-neutral-900 text-base">{product.name}</h3>
           {!product.available && (
-            <span className="text-xs bg-red-100 text-red-700 px-2 py-0.5 rounded-full">Sin stock</span>
+            <span className="text-[10px] font-bold uppercase tracking-wider bg-neutral-200 text-neutral-500 px-2 py-0.5 rounded-full">
+              Agotado
+            </span>
           )}
         </div>
         {product.description && (
-          <p className="text-sm text-neutral-500 mt-0.5 line-clamp-1">{product.description}</p>
+          <p className="text-sm text-neutral-400 mt-0.5 line-clamp-1">{product.description}</p>
         )}
-        <span className="text-sm font-medium text-neutral-900 mt-1 block">
+        <span className="text-sm font-semibold text-neutral-900 mt-1.5 block">
           {formatPrice(product.price)}
         </span>
       </div>
@@ -46,22 +47,22 @@ export function MenuItem({ product }: { product: Product }) {
           <button
             onClick={() => product.available && addItem(product)}
             disabled={!product.available}
-            className="bg-neutral-900 text-white text-sm font-semibold px-5 py-2 rounded-lg hover:bg-black active:scale-95 disabled:bg-neutral-300 disabled:cursor-not-allowed transition-all"
+            className="bg-neutral-900 text-white text-sm font-semibold px-4 py-2 rounded-xl hover:bg-black active:scale-95 disabled:bg-neutral-200 disabled:text-neutral-400 disabled:cursor-not-allowed transition-all"
           >
             Agregar
           </button>
         ) : (
-          <div className="flex items-center gap-2 bg-neutral-100 rounded-full px-1 py-1">
+          <div className="flex items-center gap-2 bg-neutral-100 rounded-xl px-1.5 py-1.5">
             <button
               onClick={() => quantity === 1 ? removeItem(product.id) : updateQty(product.id, quantity - 1)}
-              className="w-8 h-8 flex items-center justify-center rounded-full bg-white text-neutral-700 hover:bg-neutral-200 text-sm font-bold"
+              className="w-8 h-8 flex items-center justify-center rounded-lg bg-white text-neutral-700 hover:bg-neutral-50 text-sm font-bold shadow-sm"
             >
               −
             </button>
-            <span className="text-sm font-semibold w-4 text-center">{quantity}</span>
+            <span className="text-sm font-bold w-5 text-center">{quantity}</span>
             <button
               onClick={() => updateQty(product.id, quantity + 1)}
-              className="w-8 h-8 flex items-center justify-center rounded-full bg-white text-neutral-700 hover:bg-neutral-200 text-sm font-bold"
+              className="w-8 h-8 flex items-center justify-center rounded-lg bg-white text-neutral-700 hover:bg-neutral-50 text-sm font-bold shadow-sm"
             >
               +
             </button>

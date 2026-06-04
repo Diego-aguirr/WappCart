@@ -1,5 +1,3 @@
-'use client'
-
 import type { Product } from '@/lib/types'
 import { MenuItem } from './MenuItem'
 import { groupByCategory } from '@/lib/sheets'
@@ -15,10 +13,10 @@ export function MenuList({ products }: { products: Product[] }) {
     <div className="space-y-8">
       {Array.from(groups.entries()).map(([category, items]) => (
         <section key={category}>
-          <h2 className="text-lg font-bold text-neutral-900 uppercase tracking-wide mb-2 pb-2 border-b-2 border-green-600">
+          <h2 className="text-sm font-black uppercase tracking-[0.2em] text-neutral-400 mb-4">
             {category}
           </h2>
-          <div>
+          <div className="space-y-0">
             {items.map(product => (
               <MenuItem key={product.id} product={product} />
             ))}

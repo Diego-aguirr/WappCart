@@ -31,14 +31,14 @@ export default function CheckoutPage() {
   }
 
   if (count === 0) {
-    return (
-      <div className="text-center py-12">
-        <p className="text-neutral-500 mb-4">Tu carrito está vacío</p>
-        <Link href="/menu" className="text-green-600 font-medium hover:underline">
-          ← Volver al menú
-        </Link>
-      </div>
-    )
+  return (
+    <div className="text-center py-12">
+      <p className="text-neutral-500 mb-4">Tu carrito está vacío</p>
+      <Link href="/menu" className="text-neutral-900 font-semibold hover:underline underline-offset-4">
+        ← Volver al menú
+      </Link>
+    </div>
+  )
   }
 
   return (
