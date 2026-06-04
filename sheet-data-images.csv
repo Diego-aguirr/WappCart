@@ -1,0 +1,7 @@
+id,name,category,description,price,image,available
+1,Empanada de Carne,Empanadas,Carne cortada a cuchillo con cebolla huevo y aceitunas,800,https://images.unsplash.com/photo-1532635224-cf024e66d122?w=800,TRUE
+2,Empanada Jamón y Queso,Empanadas,Jamón cocido y queso cremoso,800,https://images.unsplash.com/photo-1532635224-cf024e66d122?w=800,TRUE
+3,Milanesa Napolitana,Milanesas,Con salsa de tomate jamón y queso gratinado,3500,https://images.unsplash.com/photo-1600891964092-4316c288032e?w=800,TRUE
+4,Pizza Muzzarella,Pizzas,Salsa de tomate muzzarella y orégano,4000,https://images.unsplash.com/photo-1574071318508-1cdbab80d002?w=800,TRUE
+5,Pizza Fugazzeta,Pizzas,Rellena de muzzarella con cebolla caramelizada,4500,https://images.unsplash.com/photo-1513104890138-7c749659a591?w=800,TRUE
+6,Hamburguesa Clásica,Hamburguesas,Carne lechuga tomate queso y salsa especial,3000,https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=800,FALSE

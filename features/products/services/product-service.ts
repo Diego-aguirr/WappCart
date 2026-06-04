@@ -41,7 +41,20 @@ function slugify(text: string): string {
     .replace(/(^-|-$)/g, '')
 }
 
+const DEFAULT_IMAGE = 'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=800'
+
+function isValidImageUrl(url: string): boolean {
+  if (!url) return false
+  // Rechazar URLs de carpetas de Google Drive
+  if (url.includes('drive.google.com/drive/folders')) return false
+  if (url.includes('drive.google.com/open')) return false
+  // Aceptar imágenes directas de Drive o cualquier otra URL
+  return url.startsWith('http')
+}
+
 function mapRow(row: Record<string, string>): Product {
+  const imageUrl = row.image?.trim() || ''
+  
   return {
     id: row.id,
     name: row.name?.replace(/,\s*$/, '') || '',
@@ -49,7 +62,7 @@ function mapRow(row: Record<string, string>): Product {
     category: (row.category || '').toLowerCase(),
     description: row.descripcion || row.description || '',
     price: parseInt(row.price, 10) || 0,
-    image: row.image || '',
+    image: isValidImageUrl(imageUrl) ? imageUrl : DEFAULT_IMAGE,
     available: (row.avaible || row.available || '').toUpperCase() === 'TRUE',
   }
 }
