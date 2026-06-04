@@ -4,8 +4,8 @@ import { Header } from '@/components/Header'
 import './globals.css'
 
 export const metadata: Metadata = {
-  title: 'WappCart',
-  description: 'Pedí tu comida favorita por WhatsApp',
+  title: 'Restobar',
+  description: 'Tu restaurante favorito. Pedí por WhatsApp.',
 }
 
 export default function RootLayout({

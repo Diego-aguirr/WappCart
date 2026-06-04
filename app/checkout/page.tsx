@@ -140,9 +140,9 @@ export default function CheckoutPage() {
         <button
           type="submit"
           disabled={loading}
-          className="w-full bg-green-600 text-white font-bold py-3 rounded-lg hover:bg-green-700 disabled:opacity-50 transition-colors"
+          className="w-full bg-neutral-900 text-white font-bold py-4 rounded-xl hover:bg-black active:scale-[0.98] disabled:opacity-50 transition-all"
         >
-          {loading ? 'Enviando...' : 'Enviar pedido por WhatsApp'}
+          {loading ? 'Enviando...' : 'Confirmar pedido'}
         </button>
       </form>
     </>
