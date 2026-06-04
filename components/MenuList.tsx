@@ -1,3 +1,5 @@
+'use client'
+
 import type { Product } from '@/lib/types'
 import { MenuItem } from './MenuItem'
 import { groupByCategory } from '@/lib/sheets'

@@ -41,20 +41,33 @@ function slugify(text: string): string {
     .replace(/(^-|-$)/g, '')
 }
 
+function getProductImage(name: string): string {
+  const lower = name.toLowerCase()
+  if (lower.includes('empanada')) return '/Food/empanadas.png'
+  if (lower.includes('hamburguesa')) return '/Food/hamburguesa.png'
+  if (lower.includes('papa') || lower.includes('fritas')) return '/Food/papas.png'
+  if (lower.includes('pizza')) return '/Food/pizza.png'
+  return '/Food/logo.png'
+}
+
 export async function getProducts(): Promise<Product[]> {
   try {
     const res = await fetch(URL, { next: { revalidate: 300 } })
     if (!res.ok) return []
     const rows = parseCsv(await res.text())
-    return rows.map(r => ({
-      id: r.id,
-      name: r.name?.replace(/,\s*$/, '') || '',
-      slug: slugify(r.name || ''),
-      category: (r.category || '').toLowerCase(),
-      description: r.descripcion || r.description || '',
-      price: parseInt(r.price, 10) || 0,
-      available: (r.avaible || r.available || '').toUpperCase() === 'TRUE',
-    }))
+    return rows.map(r => {
+      const name = r.name?.replace(/,\s*$/, '') || ''
+      return {
+        id: r.id,
+        name,
+        slug: slugify(name),
+        category: (r.category || '').toLowerCase(),
+        description: r.descripcion || r.description || '',
+        price: parseInt(r.price, 10) || 0,
+        image: getProductImage(name),
+        available: (r.avaible || r.available || '').toUpperCase() === 'TRUE',
+      }
+    })
   } catch {
     return []
   }

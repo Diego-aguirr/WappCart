@@ -1,5 +1,6 @@
 'use client'
 
+import Image from 'next/image'
 import { useCart } from '@/lib/cart-context'
 import { submitOrder } from '@/app/actions/order'
 import { useState } from 'react'
@@ -47,13 +48,25 @@ export default function CheckoutPage() {
       {/* Lista de items */}
       <div className="bg-white rounded-lg border mb-6">
         {items.map((item) => (
-          <div key={item.product.id} className="flex items-center justify-between p-4 border-b last:border-0">
-            <div className="flex-1">
-              <span className="font-medium">{item.product.name}</span>
-              <span className="text-sm text-neutral-500 ml-2">
+          <div key={item.product.id} className="flex items-center gap-3 p-4 border-b last:border-0">
+            {/* Imagen */}
+            <div className="relative w-14 h-14 shrink-0 rounded-lg overflow-hidden bg-neutral-100">
+              <Image
+                src={item.product.image || '/Food/logo.png'}
+                alt={item.product.name}
+                fill
+                className="object-cover"
+                sizes="56px"
+              />
+            </div>
+            
+            <div className="flex-1 min-w-0">
+              <span className="font-medium block">{item.product.name}</span>
+              <span className="text-sm text-neutral-500">
                 ${(item.product.price * item.quantity).toLocaleString('es-AR')}
               </span>
             </div>
+            
             <div className="flex items-center gap-2">
               <button
                 onClick={() => item.quantity === 1 ? removeItem(item.product.id) : updateQty(item.product.id, item.quantity - 1)}
