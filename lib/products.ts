@@ -26,8 +26,8 @@ export async function getProducts() {
 }
 
 export async function getProductBySlug(slug: string) {
-  const product = await prisma.product.findUnique({
-    where: { slug },
+  const product = await prisma.product.findFirst({
+    where: { slug, available: true },
   })
   return mapProduct(product)
 }

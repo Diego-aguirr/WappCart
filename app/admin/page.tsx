@@ -12,7 +12,7 @@ export default async function AdminPage() {
   return (
     <div className="min-h-screen bg-gray-50 p-4 md:p-8">
       <div className="w-full max-w-5xl mx-auto">
-        <div className="flex justify-between items-center mb-8">
+        <div className="flex justify-between items-center mb-2">
           <h1 className="text-3xl font-bold">Admin Panel</h1>
           <Link
             href="/admin/products/new"
@@ -21,6 +21,9 @@ export default async function AdminPage() {
             Add Product
           </Link>
         </div>
+        <p className="text-xs text-gray-500 mb-6">
+          Status: On = visible in menu, Off = hidden from customers
+        </p>
 
         <div className="bg-white rounded-lg shadow">
           <div className="grid grid-cols-[60px_1fr_1fr_80px_100px_140px] md:grid-cols-[60px_1fr_120px_80px_100px_140px] gap-2 p-3 bg-gray-100 text-sm font-medium text-gray-600 border-b">
