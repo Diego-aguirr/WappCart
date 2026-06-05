@@ -168,7 +168,7 @@ export default function ProductForm({ id, defaultValues }: ProductFormProps) {
           onChange={handleFileChange}
           className="w-full border rounded px-3 py-2"
         />
-        <input type="hidden" name="image" value={imageUrl} required />
+        <input type="hidden" name="image" defaultValue={imageUrl} key={imageUrl || 'empty'} />
         {uploading && (
           <p className="text-blue-600 text-xs mt-1">Uploading...</p>
         )}
