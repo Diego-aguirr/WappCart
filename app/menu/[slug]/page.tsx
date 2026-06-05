@@ -1,4 +1,4 @@
-import { getProductBySlug } from '@/lib/sheets'
+import { getProductBySlug } from '@/lib/products'
 import { notFound } from 'next/navigation'
 
 type Props = {
@@ -25,7 +25,7 @@ export default async function ProductPage({ params }: Props) {
       <h1 className="text-2xl font-bold text-neutral-900">{product.name}</h1>
       <p className="text-neutral-600 mt-2">{product.description}</p>
       <p className="text-xl font-bold text-neutral-900 mt-4">
-        ${product.price.toLocaleString('es-AR')}
+        ${Number(product.price).toLocaleString('es-AR')}
       </p>
       <div className="mt-4 flex gap-2">
         <span className="text-sm bg-neutral-100 text-neutral-700 px-3 py-1 rounded-full capitalize">

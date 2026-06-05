@@ -2,7 +2,7 @@
 
 import { useActionState } from 'react'
 import Link from 'next/link'
-import { createProduct, updateProduct } from '../actions'
+import { createProductAction, updateProductAction } from '../actions'
 import type { ActionState } from '../actions'
 
 interface ProductFormProps {
@@ -21,8 +21,8 @@ interface ProductFormProps {
 export default function ProductForm({ id, defaultValues }: ProductFormProps) {
   const action = id
     ? async (_state: ActionState, formData: FormData) =>
-        updateProduct(id, formData)
-    : createProduct
+        updateProductAction(id, null, formData)
+    : createProductAction
 
   const [rawState, formAction, isPending] = useActionState(action, null)
   const state = rawState as ActionState

@@ -2,8 +2,8 @@
 
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
-import { prisma } from '@/lib/prisma'
 import { requireAdmin } from '@/lib/admin-auth'
+import { createProduct, updateProduct, deleteProduct } from '@/lib/products'
 import { z } from 'zod'
 
 const checkboxBoolean = z.preprocess(
@@ -30,7 +30,7 @@ export type ActionState =
   | { success: boolean }
   | null
 
-export async function createProduct(
+export async function createProductAction(
   _prevState: ActionState,
   formData: FormData
 ): Promise<ActionState> {
@@ -44,7 +44,7 @@ export async function createProduct(
   }
 
   try {
-    await prisma.product.create({ data: result.data })
+    await createProduct(result.data)
   } catch (error) {
     return { error: 'Failed to create product' }
   }
@@ -53,8 +53,9 @@ export async function createProduct(
   redirect('/admin')
 }
 
-export async function updateProduct(
+export async function updateProductAction(
   id: string,
+  _prevState: ActionState,
   formData: FormData
 ): Promise<ActionState> {
   await requireAdmin()
@@ -67,7 +68,7 @@ export async function updateProduct(
   }
 
   try {
-    await prisma.product.update({ where: { id }, data: result.data })
+    await updateProduct(id, result.data)
   } catch (error) {
     return { error: 'Failed to update product' }
   }
@@ -76,11 +77,11 @@ export async function updateProduct(
   redirect('/admin')
 }
 
-export async function deleteProduct(id: string): Promise<ActionState> {
+export async function deleteProductAction(id: string): Promise<ActionState> {
   await requireAdmin()
 
   try {
-    await prisma.product.delete({ where: { id } })
+    await deleteProduct(id)
   } catch (error) {
     return { error: 'Failed to delete product' }
   }

@@ -1,14 +1,12 @@
 import Link from 'next/link'
-import { prisma } from '@/lib/prisma'
+import { getAllProducts } from '@/lib/products'
 import { requireAdmin } from '@/lib/admin-auth'
 import DeleteProductButton from './products/delete-button'
 
 export default async function AdminPage() {
   await requireAdmin()
 
-  const products = await prisma.product.findMany({
-    orderBy: { createdAt: 'desc' },
-  })
+  const products = await getAllProducts()
 
   return (
     <div className="min-h-screen bg-gray-50 p-8">

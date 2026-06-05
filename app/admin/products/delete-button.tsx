@@ -2,14 +2,14 @@
 
 import { useActionState } from 'react'
 import { useRouter } from 'next/navigation'
-import { deleteProduct } from '../actions'
+import { deleteProductAction } from '../actions'
 
 export default function DeleteProductButton({ id }: { id: string }) {
   const router = useRouter()
 
   const [state, formAction, isPending] = useActionState(
     async (_prevState: unknown, _formData: FormData) => {
-      const result = await deleteProduct(id)
+      const result = await deleteProductAction(id)
       if (result && 'success' in result) {
         router.refresh()
       }
