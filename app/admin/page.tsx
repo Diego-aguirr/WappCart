@@ -1,19 +1,18 @@
 import Link from 'next/link'
-import { prisma } from '@/lib/prisma'
+import { getAllProducts } from '@/lib/products'
 import { requireAdmin } from '@/lib/admin-auth'
 import DeleteProductButton from './products/delete-button'
+import ToggleAvailabilityButton from './products/toggle-availability'
 
 export default async function AdminPage() {
   await requireAdmin()
 
-  const products = await prisma.product.findMany({
-    orderBy: { createdAt: 'desc' },
-  })
+  const products = await getAllProducts()
 
   return (
-    <div className="min-h-screen bg-gray-50 p-8">
-      <div className="max-w-6xl mx-auto">
-        <div className="flex justify-between items-center mb-8">
+    <div className="min-h-screen bg-gray-50 p-4 md:p-8">
+      <div className="w-full max-w-5xl mx-auto">
+        <div className="flex justify-between items-center mb-2">
           <h1 className="text-3xl font-bold">Admin Panel</h1>
           <Link
             href="/admin/products/new"
@@ -22,60 +21,64 @@ export default async function AdminPage() {
             Add Product
           </Link>
         </div>
+        <p className="text-xs text-gray-500 mb-6">
+          Status: On = visible in menu, Off = hidden from customers
+        </p>
 
-        <div className="bg-white rounded-lg shadow overflow-hidden">
-          <table className="w-full">
-            <thead className="bg-gray-100">
-              <tr>
-                <th className="px-4 py-3 text-left">Image</th>
-                <th className="px-4 py-3 text-left">Name</th>
-                <th className="px-4 py-3 text-left">Category</th>
-                <th className="px-4 py-3 text-left">Price</th>
-                <th className="px-4 py-3 text-left">Status</th>
-                <th className="px-4 py-3 text-left">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {products.map((product) => (
-                <tr key={product.id} className="border-t">
-                  <td className="px-4 py-3">
-                    <img
-                      src={product.image}
-                      alt={product.name}
-                      className="w-12 h-12 object-cover rounded"
-                    />
-                  </td>
-                  <td className="px-4 py-3">{product.name}</td>
-                  <td className="px-4 py-3">{product.category}</td>
-                  <td className="px-4 py-3">
-                    ${Number(product.price).toLocaleString()}
-                  </td>
-                  <td className="px-4 py-3">
-                    <span
-                      className={`px-2 py-1 rounded text-sm ${
-                        product.available
-                          ? 'bg-green-100 text-green-800'
-                          : 'bg-red-100 text-red-800'
-                      }`}
-                    >
-                      {product.available ? 'Available' : 'Unavailable'}
-                    </span>
-                  </td>
-                  <td className="px-4 py-3">
-                    <div className="flex gap-2">
-                      <Link
-                        href={`/admin/products/${product.id}`}
-                        className="text-blue-600 hover:underline"
-                      >
-                        Edit
-                      </Link>
-                      <DeleteProductButton id={product.id} />
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+        <div className="bg-white rounded-lg shadow">
+          <div className="grid grid-cols-[60px_1fr_1fr_80px_100px_140px] md:grid-cols-[60px_1fr_120px_80px_100px_140px] gap-2 p-3 bg-gray-100 text-sm font-medium text-gray-600 border-b">
+            <div>Img</div>
+            <div>Name</div>
+            <div className="hidden md:block">Category</div>
+            <div>Price</div>
+            <div>Status</div>
+            <div>Actions</div>
+          </div>
+
+          {products.map((product) => (
+            <div
+              key={product.id}
+              className="grid grid-cols-[60px_1fr_1fr_80px_100px_140px] md:grid-cols-[60px_1fr_120px_80px_100px_140px] gap-2 p-3 items-center border-b hover:bg-gray-50"
+            >
+              <div>
+                <img
+                  src={product.image}
+                  alt={product.name}
+                  className="w-10 h-10 object-cover rounded"
+                />
+              </div>
+              <div className="text-sm font-medium truncate">{product.name}</div>
+              <div className="hidden md:block text-sm text-gray-600 truncate">
+                {product.category}
+              </div>
+              <div className="text-sm">${Number(product.price).toLocaleString()}</div>
+              <div>
+                <span
+                  className={`text-xs px-2 py-1 rounded-full whitespace-nowrap ${
+                    product.available
+                      ? 'bg-green-100 text-green-800'
+                      : 'bg-red-100 text-red-800'
+                  }`}
+                >
+                  {product.available ? 'On' : 'Off'}
+                </span>
+              </div>
+              <div className="flex items-center gap-1">
+                <Link
+                  href={`/admin/products/${product.id}`}
+                  className="text-xs bg-gray-100 hover:bg-gray-200 px-2 py-1 rounded transition-colors"
+                  title="Edit"
+                >
+                  Edit
+                </Link>
+                <ToggleAvailabilityButton
+                  id={product.id}
+                  available={product.available}
+                />
+                <DeleteProductButton id={product.id} />
+              </div>
+            </div>
+          ))}
         </div>
       </div>
     </div>

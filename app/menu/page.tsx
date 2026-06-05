@@ -1,13 +1,11 @@
 import Image from 'next/image'
-import { getProducts } from '@/lib/sheets'
+import { getProducts } from '@/lib/products'
 import { MenuList } from '@/components/MenuList'
 
 export const metadata = {
   title: 'Menú | WappCart',
   description: 'Nuestro menú de comidas',
 }
-
-export const revalidate = 300
 
 export default async function MenuPage() {
   const products = await getProducts()

@@ -1,5 +1,5 @@
 import { notFound } from 'next/navigation'
-import { prisma } from '@/lib/prisma'
+import { getProductById } from '@/lib/products'
 import { requireAdmin } from '@/lib/admin-auth'
 import ProductForm from '../product-form'
 import Link from 'next/link'
@@ -12,7 +12,7 @@ export default async function EditProductPage({
   await requireAdmin()
 
   const { id } = await params
-  const product = await prisma.product.findUnique({ where: { id } })
+  const product = await getProductById(id)
 
   if (!product) {
     notFound()

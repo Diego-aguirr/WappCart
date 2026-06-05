@@ -2,14 +2,14 @@
 
 import { useActionState } from 'react'
 import { useRouter } from 'next/navigation'
-import { deleteProduct } from '../actions'
+import { deleteProductAction } from '../actions'
 
 export default function DeleteProductButton({ id }: { id: string }) {
   const router = useRouter()
 
   const [state, formAction, isPending] = useActionState(
     async (_prevState: unknown, _formData: FormData) => {
-      const result = await deleteProduct(id)
+      const result = await deleteProductAction(id)
       if (result && 'success' in result) {
         router.refresh()
       }
@@ -23,7 +23,7 @@ export default function DeleteProductButton({ id }: { id: string }) {
       <button
         type="submit"
         disabled={isPending}
-        className="text-red-600 hover:underline disabled:opacity-50"
+        className="text-[10px] text-red-600 bg-red-50 hover:bg-red-100 px-1.5 py-0.5 rounded transition-colors disabled:opacity-50 whitespace-nowrap"
       >
         Delete
       </button>

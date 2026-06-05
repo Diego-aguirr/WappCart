@@ -1,4 +1,5 @@
 import { cookies } from 'next/headers'
+import { redirect } from 'next/navigation'
 import { SignJWT, jwtVerify } from 'jose'
 import { prisma } from './prisma'
 import bcrypt from 'bcryptjs'
@@ -39,7 +40,7 @@ export async function getAdminSession() {
 export async function requireAdmin() {
   const userId = await getAdminSession()
   if (!userId) {
-    throw new Error('Unauthorized')
+    redirect('/admin/login')
   }
   return userId
 }

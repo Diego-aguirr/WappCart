@@ -1,8 +1,7 @@
 'use client'
 
-import { useActionState } from 'react'
-import Link from 'next/link'
-import { createProduct, updateProduct } from '../actions'
+import { useActionState, useState, useCallback } from 'react'
+import { createProductAction, updateProductAction } from '../actions'
 import type { ActionState } from '../actions'
 
 interface ProductFormProps {
@@ -18,11 +17,67 @@ interface ProductFormProps {
   }
 }
 
+function slugify(text: string): string {
+  return text
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/(^-|-$)/g, '')
+}
+
+type UploadStatus = 'idle' | 'uploading' | 'success' | 'error'
+
 export default function ProductForm({ id, defaultValues }: ProductFormProps) {
+  const [name, setName] = useState(defaultValues?.name || '')
+  const [slug, setSlug] = useState(defaultValues?.slug || '')
+  const [imageUrl, setImageUrl] = useState(defaultValues?.image || '')
+  const [uploadStatus, setUploadStatus] = useState<UploadStatus>('idle')
+  const [uploadMessage, setUploadMessage] = useState('')
+
+  const handleNameChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const newName = e.target.value
+    setName(newName)
+    if (!id) {
+      setSlug(slugify(newName))
+    }
+  }, [id])
+
+  const handleFileChange = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    setUploadStatus('uploading')
+    setUploadMessage('')
+
+    try {
+      const formData = new FormData()
+      formData.append('file', file)
+
+      const res = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
+      })
+
+      const data = await res.json()
+      if (data.url) {
+        setImageUrl(data.url)
+        setUploadStatus('success')
+        setUploadMessage(data.message || 'Imagen cargada exitosamente')
+      } else {
+        setUploadStatus('error')
+        setUploadMessage(data.error || 'Error al cargar la imagen')
+      }
+    } catch {
+      setUploadStatus('error')
+      setUploadMessage('Error de conexión al subir imagen')
+    }
+  }, [])
+
   const action = id
     ? async (_state: ActionState, formData: FormData) =>
-        updateProduct(id, formData)
-    : createProduct
+        updateProductAction(id, null, formData)
+    : createProductAction
 
   const [rawState, formAction, isPending] = useActionState(action, null)
   const state = rawState as ActionState
@@ -51,7 +106,8 @@ export default function ProductForm({ id, defaultValues }: ProductFormProps) {
           id="name"
           name="name"
           required
-          defaultValue={defaultValues?.name}
+          value={name}
+          onChange={handleNameChange}
           className="w-full border rounded px-3 py-2"
         />
         {fieldErrors.name && (
@@ -66,10 +122,11 @@ export default function ProductForm({ id, defaultValues }: ProductFormProps) {
           id="slug"
           name="slug"
           required
-          defaultValue={defaultValues?.slug}
-          className="w-full border rounded px-3 py-2"
-          placeholder="e.g., pizza-muzzarella"
+          value={slug}
+          readOnly
+          className="w-full border rounded px-3 py-2 bg-gray-50 text-gray-500"
         />
+        <p className="text-xs text-gray-400 mt-1">Generated automatically from name</p>
         {fieldErrors.slug && (
           <p className="text-red-600 text-xs mt-1">{fieldErrors.slug.join(', ')}</p>
         )}
@@ -108,18 +165,35 @@ export default function ProductForm({ id, defaultValues }: ProductFormProps) {
         )}
       </div>
       <div>
-        <label htmlFor="image" className="block text-sm font-medium mb-1">
-          Image URL
+        <label htmlFor="image-file" className="block text-sm font-medium mb-1">
+          Product Image
         </label>
         <input
-          id="image"
-          name="image"
-          type="url"
-          required
-          defaultValue={defaultValues?.image}
+          type="file"
+          id="image-file"
+          accept="image/*"
+          onChange={handleFileChange}
           className="w-full border rounded px-3 py-2"
-          placeholder="https://..."
         />
+        <input type="hidden" name="image" value={imageUrl} key={imageUrl || 'empty'} />
+        {uploadStatus === 'uploading' && (
+          <p className="text-blue-600 text-xs mt-1">Subiendo imagen...</p>
+        )}
+        {uploadStatus === 'success' && (
+          <p className="text-green-600 text-sm mt-1 font-medium">{uploadMessage}</p>
+        )}
+        {uploadStatus === 'error' && (
+          <p className="text-red-600 text-sm mt-1">{uploadMessage}</p>
+        )}
+        {imageUrl && uploadStatus === 'success' && (
+          <div className="mt-2">
+            <img
+              src={imageUrl}
+              alt="Preview"
+              className="w-24 h-24 object-cover rounded border"
+            />
+          </div>
+        )}
         {fieldErrors.image && (
           <p className="text-red-600 text-xs mt-1">{fieldErrors.image.join(', ')}</p>
         )}

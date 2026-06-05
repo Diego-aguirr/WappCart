@@ -1,13 +1,13 @@
 import type { Product } from '@/lib/types'
 import { MenuItem } from './MenuItem'
-import { groupByCategory } from '@/lib/sheets'
+import { groupByCategory } from '@/lib/products'
 
-export function MenuList({ products }: { products: Product[] }) {
+export async function MenuList({ products }: { products: Product[] }) {
   if (!products.length) {
     return <p className="text-center text-neutral-500 py-12">No hay productos disponibles</p>
   }
 
-  const groups = groupByCategory(products)
+  const groups = await groupByCategory(products)
 
   return (
     <div className="space-y-8">
