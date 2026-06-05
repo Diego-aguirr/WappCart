@@ -86,3 +86,15 @@ export async function updateProduct(
 export async function deleteProduct(id: string) {
   return prisma.product.delete({ where: { id } })
 }
+
+export async function toggleAvailability(id: string) {
+  const product = await prisma.product.findUnique({
+    where: { id },
+    select: { available: true },
+  })
+  if (!product) throw new Error('Product not found')
+  return prisma.product.update({
+    where: { id },
+    data: { available: !product.available },
+  })
+}

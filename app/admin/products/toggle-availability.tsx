@@ -14,8 +14,8 @@ export default function ToggleAvailabilityButton({
   const router = useRouter()
 
   const [state, formAction, isPending] = useActionState(
-    async (_prevState: unknown, _formData: FormData) => {
-      const result = await toggleProductAvailability(id, available)
+    async (_prevState: unknown, formData: FormData) => {
+      const result = await toggleProductAvailability(null, formData)
       if (result && 'success' in result) {
         router.refresh()
       }
@@ -26,6 +26,8 @@ export default function ToggleAvailabilityButton({
 
   return (
     <form action={formAction}>
+      <input type="hidden" name="id" value={id} />
+      <input type="hidden" name="currentAvailable" value={available.toString()} />
       <button
         type="submit"
         disabled={isPending}

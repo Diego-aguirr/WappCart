@@ -3,7 +3,7 @@
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { requireAdmin } from '@/lib/admin-auth'
-import { createProduct, updateProduct, deleteProduct } from '@/lib/products'
+import { createProduct, updateProduct, deleteProduct, toggleAvailability } from '@/lib/products'
 import { z } from 'zod'
 
 const checkboxBoolean = z.preprocess(
@@ -90,11 +90,17 @@ export async function deleteProductAction(id: string): Promise<ActionState> {
   return { success: true }
 }
 
-export async function toggleProductAvailability(id: string, currentAvailable: boolean): Promise<ActionState> {
+export async function toggleProductAvailability(
+  _prevState: ActionState,
+  formData: FormData
+): Promise<ActionState> {
   await requireAdmin()
 
+  const id = formData.get('id') as string
+  if (!id) return { error: 'Product ID missing' }
+
   try {
-    await updateProduct(id, { available: !currentAvailable } as any)
+    await toggleAvailability(id)
   } catch (error) {
     return { error: 'Failed to update availability' }
   }
