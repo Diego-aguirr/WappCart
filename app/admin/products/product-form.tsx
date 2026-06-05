@@ -1,6 +1,6 @@
 'use client'
 
-import { useActionState } from 'react'
+import { useActionState, useState, useCallback } from 'react'
 import Link from 'next/link'
 import { createProductAction, updateProductAction } from '../actions'
 import type { ActionState } from '../actions'
@@ -19,6 +19,36 @@ interface ProductFormProps {
 }
 
 export default function ProductForm({ id, defaultValues }: ProductFormProps) {
+  const [imageUrl, setImageUrl] = useState(defaultValues?.image || '')
+  const [uploading, setUploading] = useState(false)
+
+  const handleFileChange = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    setUploading(true)
+    try {
+      const formData = new FormData()
+      formData.append('file', file)
+
+      const res = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
+      })
+
+      const data = await res.json()
+      if (data.url) {
+        setImageUrl(data.url)
+      } else {
+        alert('Failed to upload image')
+      }
+    } catch (error) {
+      alert('Upload error')
+    } finally {
+      setUploading(false)
+    }
+  }, [])
+
   const action = id
     ? async (_state: ActionState, formData: FormData) =>
         updateProductAction(id, null, formData)
@@ -108,18 +138,25 @@ export default function ProductForm({ id, defaultValues }: ProductFormProps) {
         )}
       </div>
       <div>
-        <label htmlFor="image" className="block text-sm font-medium mb-1">
-          Image URL
+        <label htmlFor="image-file" className="block text-sm font-medium mb-1">
+          Product Image
         </label>
         <input
-          id="image"
-          name="image"
-          type="url"
-          required
-          defaultValue={defaultValues?.image}
+          type="file"
+          id="image-file"
+          accept="image/*"
+          onChange={handleFileChange}
           className="w-full border rounded px-3 py-2"
-          placeholder="https://..."
         />
+        <input type="hidden" name="image" value={imageUrl} required />
+        {uploading && (
+          <p className="text-blue-600 text-xs mt-1">Uploading...</p>
+        )}
+        {imageUrl && (
+          <div className="mt-2">
+            <img src={imageUrl} alt="Preview" className="w-24 h-24 object-cover rounded border" />
+          </div>
+        )}
         {fieldErrors.image && (
           <p className="text-red-600 text-xs mt-1">{fieldErrors.image.join(', ')}</p>
         )}
