@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { getAllProducts } from '@/lib/products'
 import { requireAdmin } from '@/lib/admin-auth'
 import DeleteProductButton from './products/delete-button'
+import ToggleAvailabilityButton from './products/toggle-availability'
 
 export default async function AdminPage() {
   await requireAdmin()
@@ -60,13 +61,17 @@ export default async function AdminPage() {
                     </span>
                   </td>
                   <td className="px-4 py-3">
-                    <div className="flex gap-2">
+                    <div className="flex items-center gap-2">
                       <Link
                         href={`/admin/products/${product.id}`}
                         className="text-blue-600 hover:underline"
                       >
                         Edit
                       </Link>
+                      <ToggleAvailabilityButton
+                        id={product.id}
+                        available={product.available}
+                      />
                       <DeleteProductButton id={product.id} />
                     </div>
                   </td>

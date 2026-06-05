@@ -89,3 +89,16 @@ export async function deleteProductAction(id: string): Promise<ActionState> {
   revalidatePath('/admin')
   return { success: true }
 }
+
+export async function toggleProductAvailability(id: string, currentAvailable: boolean): Promise<ActionState> {
+  await requireAdmin()
+
+  try {
+    await updateProduct(id, { available: !currentAvailable } as any)
+  } catch (error) {
+    return { error: 'Failed to update availability' }
+  }
+
+  revalidatePath('/admin')
+  return { success: true }
+}
