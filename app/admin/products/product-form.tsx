@@ -26,11 +26,15 @@ function slugify(text: string): string {
     .replace(/(^-|-$)/g, '')
 }
 
+type ImageStatus = 'idle' | 'loading' | 'success' | 'error'
+
 export default function ProductForm({ id, defaultValues }: ProductFormProps) {
   const [name, setName] = useState(defaultValues?.name || '')
   const [slug, setSlug] = useState(defaultValues?.slug || '')
   const [imageUrl, setImageUrl] = useState(defaultValues?.image || '')
-  const [uploading, setUploading] = useState(false)
+  const [imageStatus, setImageStatus] = useState<ImageStatus>(
+    defaultValues?.image ? 'success' : 'idle'
+  )
 
   const handleNameChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const newName = e.target.value
@@ -40,31 +44,18 @@ export default function ProductForm({ id, defaultValues }: ProductFormProps) {
     }
   }, [id])
 
-  const handleFileChange = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (!file) return
-
-    setUploading(true)
-    try {
-      const formData = new FormData()
-      formData.append('file', file)
-
-      const res = await fetch('/api/upload', {
-        method: 'POST',
-        body: formData,
-      })
-
-      const data = await res.json()
-      if (data.url) {
-        setImageUrl(data.url)
-      } else {
-        alert('Failed to upload image')
-      }
-    } catch (error) {
-      alert('Upload error')
-    } finally {
-      setUploading(false)
+  const handleImageChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const url = e.target.value
+    setImageUrl(url)
+    if (!url) {
+      setImageStatus('idle')
+      return
     }
+    setImageStatus('loading')
+    const img = new Image()
+    img.onload = () => setImageStatus('success')
+    img.onerror = () => setImageStatus('error')
+    img.src = url
   }, [])
 
   const action = id
@@ -88,6 +79,13 @@ export default function ProductForm({ id, defaultValues }: ProductFormProps) {
     state && 'error' in state && typeof state.error === 'string'
       ? state.error
       : null
+
+  const imageBorderColor =
+    imageStatus === 'error'
+      ? 'border-red-500'
+      : imageStatus === 'success'
+      ? 'border-green-500'
+      : 'border-gray-300'
 
   return (
     <form action={formAction} className="space-y-4">
@@ -158,23 +156,37 @@ export default function ProductForm({ id, defaultValues }: ProductFormProps) {
         )}
       </div>
       <div>
-        <label htmlFor="image-file" className="block text-sm font-medium mb-1">
-          Product Image
+        <label htmlFor="image" className="block text-sm font-medium mb-1">
+          Image URL
         </label>
         <input
-          type="file"
-          id="image-file"
-          accept="image/*"
-          onChange={handleFileChange}
-          className="w-full border rounded px-3 py-2"
+          id="image"
+          name="image"
+          type="url"
+          required
+          value={imageUrl}
+          onChange={handleImageChange}
+          className={`w-full border rounded px-3 py-2 ${imageBorderColor}`}
+          placeholder="https://example.com/image.jpg"
         />
-        <input type="hidden" name="image" defaultValue={imageUrl} key={imageUrl || 'empty'} />
-        {uploading && (
-          <p className="text-blue-600 text-xs mt-1">Uploading...</p>
-        )}
-        {imageUrl && (
+        <div className="flex items-center gap-2 mt-1">
+          {imageStatus === 'loading' && (
+            <span className="text-xs text-blue-600">Checking image...</span>
+          )}
+          {imageStatus === 'success' && (
+            <span className="text-xs text-green-600">Image loaded successfully</span>
+          )}
+          {imageStatus === 'error' && (
+            <span className="text-xs text-red-600">Failed to load image</span>
+          )}
+        </div>
+        {imageUrl && imageStatus === 'success' && (
           <div className="mt-2">
-            <img src={imageUrl} alt="Preview" className="w-24 h-24 object-cover rounded border" />
+            <img
+              src={imageUrl}
+              alt="Preview"
+              className="w-24 h-24 object-cover rounded border"
+            />
           </div>
         )}
         {fieldErrors.image && (

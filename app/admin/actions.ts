@@ -20,7 +20,7 @@ const ProductSchema = z.object({
   slug: z.string().min(1).max(100),
   description: z.string().min(1).max(500),
   price: z.coerce.number().positive(),
-  image: z.string().min(1),
+  image: z.string().url('Must be a valid URL'),
   category: z.string().min(1),
   available: checkboxBoolean,
 })
