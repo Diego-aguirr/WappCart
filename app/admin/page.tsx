@@ -10,8 +10,8 @@ export default async function AdminPage() {
   const products = await getAllProducts()
 
   return (
-    <div className="min-h-screen bg-gray-50 p-8">
-      <div className="max-w-6xl mx-auto">
+    <div className="min-h-screen bg-gray-50 p-4 md:p-8">
+      <div className="w-full max-w-7xl mx-auto">
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-3xl font-bold">Admin Panel</h1>
           <Link
@@ -22,16 +22,16 @@ export default async function AdminPage() {
           </Link>
         </div>
 
-        <div className="bg-white rounded-lg shadow overflow-hidden">
-          <table className="w-full">
+        <div className="bg-white rounded-lg shadow overflow-x-auto">
+          <table className="w-full min-w-[800px]">
             <thead className="bg-gray-100">
               <tr>
-                <th className="px-4 py-3 text-left">Image</th>
-                <th className="px-4 py-3 text-left">Name</th>
-                <th className="px-4 py-3 text-left">Category</th>
-                <th className="px-4 py-3 text-left">Price</th>
-                <th className="px-4 py-3 text-left">Status</th>
-                <th className="px-4 py-3 text-left">Actions</th>
+                <th className="px-4 py-3 text-left whitespace-nowrap">Image</th>
+                <th className="px-4 py-3 text-left whitespace-nowrap">Name</th>
+                <th className="px-4 py-3 text-left whitespace-nowrap">Category</th>
+                <th className="px-4 py-3 text-left whitespace-nowrap">Price</th>
+                <th className="px-4 py-3 text-left whitespace-nowrap">Status</th>
+                <th className="px-6 py-3 text-left whitespace-nowrap">Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -44,14 +44,14 @@ export default async function AdminPage() {
                       className="w-12 h-12 object-cover rounded"
                     />
                   </td>
-                  <td className="px-4 py-3">{product.name}</td>
-                  <td className="px-4 py-3">{product.category}</td>
-                  <td className="px-4 py-3">
+                  <td className="px-4 py-3 whitespace-nowrap">{product.name}</td>
+                  <td className="px-4 py-3 whitespace-nowrap">{product.category}</td>
+                  <td className="px-4 py-3 whitespace-nowrap">
                     ${Number(product.price).toLocaleString()}
                   </td>
                   <td className="px-4 py-3">
                     <span
-                      className={`px-2 py-1 rounded text-sm ${
+                      className={`px-2 py-1 rounded text-sm whitespace-nowrap ${
                         product.available
                           ? 'bg-green-100 text-green-800'
                           : 'bg-red-100 text-red-800'
@@ -60,11 +60,11 @@ export default async function AdminPage() {
                       {product.available ? 'Available' : 'Unavailable'}
                     </span>
                   </td>
-                  <td className="px-4 py-3">
-                    <div className="flex items-center gap-2">
+                  <td className="px-6 py-3">
+                    <div className="flex items-center gap-3">
                       <Link
                         href={`/admin/products/${product.id}`}
-                        className="text-blue-600 hover:underline"
+                        className="text-blue-600 hover:underline whitespace-nowrap"
                       >
                         Edit
                       </Link>

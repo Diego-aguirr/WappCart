@@ -23,7 +23,7 @@ export default function DeleteProductButton({ id }: { id: string }) {
       <button
         type="submit"
         disabled={isPending}
-        className="text-red-600 hover:underline disabled:opacity-50"
+        className="text-red-600 hover:underline disabled:opacity-50 whitespace-nowrap"
       >
         Delete
       </button>
