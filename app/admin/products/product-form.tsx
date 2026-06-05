@@ -26,15 +26,14 @@ function slugify(text: string): string {
     .replace(/(^-|-$)/g, '')
 }
 
-type ImageStatus = 'idle' | 'loading' | 'success' | 'error'
+type UploadStatus = 'idle' | 'uploading' | 'success' | 'error'
 
 export default function ProductForm({ id, defaultValues }: ProductFormProps) {
   const [name, setName] = useState(defaultValues?.name || '')
   const [slug, setSlug] = useState(defaultValues?.slug || '')
   const [imageUrl, setImageUrl] = useState(defaultValues?.image || '')
-  const [imageStatus, setImageStatus] = useState<ImageStatus>(
-    defaultValues?.image ? 'success' : 'idle'
-  )
+  const [uploadStatus, setUploadStatus] = useState<UploadStatus>('idle')
+  const [uploadMessage, setUploadMessage] = useState('')
 
   const handleNameChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const newName = e.target.value
@@ -44,18 +43,35 @@ export default function ProductForm({ id, defaultValues }: ProductFormProps) {
     }
   }, [id])
 
-  const handleImageChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    const url = e.target.value
-    setImageUrl(url)
-    if (!url) {
-      setImageStatus('idle')
-      return
+  const handleFileChange = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    setUploadStatus('uploading')
+    setUploadMessage('')
+
+    try {
+      const formData = new FormData()
+      formData.append('file', file)
+
+      const res = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
+      })
+
+      const data = await res.json()
+      if (data.url) {
+        setImageUrl(data.url)
+        setUploadStatus('success')
+        setUploadMessage(data.message || 'Imagen cargada exitosamente')
+      } else {
+        setUploadStatus('error')
+        setUploadMessage(data.error || 'Error al cargar la imagen')
+      }
+    } catch {
+      setUploadStatus('error')
+      setUploadMessage('Error de conexión al subir imagen')
     }
-    setImageStatus('loading')
-    const img = new Image()
-    img.onload = () => setImageStatus('success')
-    img.onerror = () => setImageStatus('error')
-    img.src = url
   }, [])
 
   const action = id
@@ -79,13 +95,6 @@ export default function ProductForm({ id, defaultValues }: ProductFormProps) {
     state && 'error' in state && typeof state.error === 'string'
       ? state.error
       : null
-
-  const imageBorderColor =
-    imageStatus === 'error'
-      ? 'border-red-500'
-      : imageStatus === 'success'
-      ? 'border-green-500'
-      : 'border-gray-300'
 
   return (
     <form action={formAction} className="space-y-4">
@@ -156,31 +165,28 @@ export default function ProductForm({ id, defaultValues }: ProductFormProps) {
         )}
       </div>
       <div>
-        <label htmlFor="image" className="block text-sm font-medium mb-1">
-          Image URL
+        <label htmlFor="image-file" className="block text-sm font-medium mb-1">
+          Product Image
         </label>
         <input
-          id="image"
-          name="image"
-          type="url"
-          required
-          value={imageUrl}
-          onChange={handleImageChange}
-          className={`w-full border rounded px-3 py-2 ${imageBorderColor}`}
-          placeholder="https://example.com/image.jpg"
+          type="file"
+          id="image-file"
+          name="file"
+          accept="image/*"
+          onChange={handleFileChange}
+          className="w-full border rounded px-3 py-2"
         />
-        <div className="flex items-center gap-2 mt-1">
-          {imageStatus === 'loading' && (
-            <span className="text-xs text-blue-600">Checking image...</span>
-          )}
-          {imageStatus === 'success' && (
-            <span className="text-xs text-green-600">Image loaded successfully</span>
-          )}
-          {imageStatus === 'error' && (
-            <span className="text-xs text-red-600">Failed to load image</span>
-          )}
-        </div>
-        {imageUrl && imageStatus === 'success' && (
+        <input type="hidden" name="image" value={imageUrl} key={imageUrl || 'empty'} />
+        {uploadStatus === 'uploading' && (
+          <p className="text-blue-600 text-xs mt-1">Subiendo imagen...</p>
+        )}
+        {uploadStatus === 'success' && (
+          <p className="text-green-600 text-sm mt-1 font-medium">{uploadMessage}</p>
+        )}
+        {uploadStatus === 'error' && (
+          <p className="text-red-600 text-sm mt-1">{uploadMessage}</p>
+        )}
+        {imageUrl && uploadStatus === 'success' && (
           <div className="mt-2">
             <img
               src={imageUrl}
