@@ -171,7 +171,6 @@ export default function ProductForm({ id, defaultValues }: ProductFormProps) {
         <input
           type="file"
           id="image-file"
-          name="file"
           accept="image/*"
           onChange={handleFileChange}
           className="w-full border rounded px-3 py-2"
