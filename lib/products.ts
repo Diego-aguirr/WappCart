@@ -41,7 +41,10 @@ export async function getProductById(id: string) {
 
 export async function getAllProducts() {
   const products = await prisma.product.findMany({
-    orderBy: { createdAt: 'desc' },
+    orderBy: [
+      { available: 'desc' },
+      { createdAt: 'desc' },
+    ],
   })
   return products.map(p => mapProduct(p)!)
 }
