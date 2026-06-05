@@ -29,7 +29,7 @@ export default function ToggleAvailabilityButton({
       <button
         type="submit"
         disabled={isPending}
-        className={`px-2 py-1 rounded text-xs font-medium whitespace-nowrap transition-colors disabled:opacity-50 ${
+        className={`px-1.5 py-0.5 rounded text-[10px] font-medium whitespace-nowrap transition-colors disabled:opacity-50 ${
           available
             ? 'bg-red-100 text-red-700 hover:bg-red-200'
             : 'bg-green-100 text-green-700 hover:bg-green-200'
