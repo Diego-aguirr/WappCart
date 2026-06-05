@@ -1,7 +1,6 @@
 'use client'
 
 import { useActionState, useState, useCallback } from 'react'
-import Link from 'next/link'
 import { createProductAction, updateProductAction } from '../actions'
 import type { ActionState } from '../actions'
 
@@ -18,9 +17,28 @@ interface ProductFormProps {
   }
 }
 
+function slugify(text: string): string {
+  return text
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/(^-|-$)/g, '')
+}
+
 export default function ProductForm({ id, defaultValues }: ProductFormProps) {
+  const [name, setName] = useState(defaultValues?.name || '')
+  const [slug, setSlug] = useState(defaultValues?.slug || '')
   const [imageUrl, setImageUrl] = useState(defaultValues?.image || '')
   const [uploading, setUploading] = useState(false)
+
+  const handleNameChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const newName = e.target.value
+    setName(newName)
+    if (!id) {
+      setSlug(slugify(newName))
+    }
+  }, [id])
 
   const handleFileChange = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -81,7 +99,8 @@ export default function ProductForm({ id, defaultValues }: ProductFormProps) {
           id="name"
           name="name"
           required
-          defaultValue={defaultValues?.name}
+          value={name}
+          onChange={handleNameChange}
           className="w-full border rounded px-3 py-2"
         />
         {fieldErrors.name && (
@@ -96,10 +115,11 @@ export default function ProductForm({ id, defaultValues }: ProductFormProps) {
           id="slug"
           name="slug"
           required
-          defaultValue={defaultValues?.slug}
-          className="w-full border rounded px-3 py-2"
-          placeholder="e.g., pizza-muzzarella"
+          value={slug}
+          readOnly
+          className="w-full border rounded px-3 py-2 bg-gray-50 text-gray-500"
         />
+        <p className="text-xs text-gray-400 mt-1">Generated automatically from name</p>
         {fieldErrors.slug && (
           <p className="text-red-600 text-xs mt-1">{fieldErrors.slug.join(', ')}</p>
         )}
