@@ -1,11 +1,11 @@
 import Link from 'next/link'
 import { getAllProducts } from '@/lib/products'
-import { requireAdmin } from '@/lib/admin-auth'
+import { requireAuth } from '@/lib/admin-auth'
 import DeleteProductButton from './products/delete-button'
 import ToggleAvailabilityButton from './products/toggle-availability'
 
 export default async function AdminPage() {
-  await requireAdmin()
+  await requireAuth()
 
   const products = await getAllProducts()
 

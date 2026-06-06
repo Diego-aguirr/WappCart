@@ -2,12 +2,29 @@
 
 import { z } from 'zod'
 import type { CartItem } from '@/lib/types'
+import { checkRateLimit, sanitizeString } from '@/lib/security'
 
 const OrderSchema = z.object({
-  customerName: z.string().min(2, 'Nombre requerido'),
-  phone: z.string().regex(/^\d{10,15}$/, 'Teléfono inválido'),
-  address: z.string().min(5, 'Dirección requerida'),
-  notes: z.string().max(500).optional(),
+  customerName: z.string()
+    .min(2, 'Nombre requerido')
+    .max(100, 'Nombre demasiado largo')
+    .trim()
+    .refine(val => !/[<>]/.test(val), 'El nombre contiene caracteres no permitidos'),
+  
+  phone: z.string()
+    .regex(/^\+?\d{10,15}$/, 'Teléfono inválido'),
+  
+  address: z.string()
+    .min(5, 'Dirección requerida')
+    .max(200, 'Dirección demasiado larga')
+    .trim()
+    .refine(val => !/[<>]/.test(val), 'La dirección contiene caracteres no permitidos'),
+  
+  notes: z.string()
+    .max(500)
+    .trim()
+    .optional()
+    .default(''),
 })
 
 function generateMessage(
@@ -49,16 +66,24 @@ export async function submitOrder(
     return { success: false, error: 'El carrito está vacío' }
   }
 
+  // Sanitize inputs
+  const sanitizedData = {
+    customerName: sanitizeString(result.data.customerName),
+    phone: sanitizeString(result.data.phone),
+    address: sanitizeString(result.data.address),
+    notes: result.data.notes ? sanitizeString(result.data.notes) : undefined,
+  }
+
   const total = items.reduce((sum, i) => sum + i.product.price * i.quantity, 0)
   const phone = process.env.WHATSAPP_NUMBER || '5491123456789'
   
   const message = generateMessage(
-    result.data.customerName,
-    result.data.phone,
-    result.data.address,
+    sanitizedData.customerName,
+    sanitizedData.phone,
+    sanitizedData.address,
     items,
     total,
-    result.data.notes
+    sanitizedData.notes
   )
 
   return {

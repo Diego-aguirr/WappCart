@@ -1,46 +1,111 @@
 import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
-import { SignJWT, jwtVerify } from 'jose'
 import { prisma } from './prisma'
 import bcrypt from 'bcryptjs'
 
-const SECRET = new TextEncoder().encode(process.env.NEXTAUTH_SECRET || 'wappcart-secret-123')
+const COOKIE_NAME = 'admin-session'
 
-export async function verifyAdmin(email: string, password: string) {
-  const user = await prisma.user.findUnique({ where: { email } })
-  if (!user || user.role !== 'admin') return null
-  const valid = await bcrypt.compare(password, user.password)
-  if (!valid) return null
-  return user
+const COOKIE_OPTIONS = {
+  httpOnly: true,
+  secure: process.env.NODE_ENV === 'production',
+  sameSite: 'strict' as const,
+  maxAge: 8 * 3600, // 8 hours
+  path: '/',
 }
 
-export async function createAdminToken(userId: string) {
-  return new SignJWT({ userId, role: 'admin' })
-    .setProtectedHeader({ alg: 'HS256' })
-    .setExpirationTime('8h')
-    .sign(SECRET)
+function getPepper(): string {
+  const pepper = process.env.ADMIN_PEPPER
+  if (!pepper || pepper.length < 32) {
+    throw new Error('ADMIN_PEPPER must be set and at least 32 characters')
+  }
+  return pepper
 }
 
-export async function verifyAdminToken(token: string) {
+async function computeSessionHash(
+  password: string,
+  email: string,
+  salt: string
+): Promise<string> {
+  const pepper = getPepper()
+  return bcrypt.hash(password + pepper + email, salt)
+}
+
+export async function login(
+  email: string,
+  password: string
+): Promise<boolean> {
   try {
-    const { payload } = await jwtVerify(token, SECRET)
-    return payload.userId as string
-  } catch {
-    return null
+    const user = await prisma.user.findUnique({ where: { email } })
+    if (!user || user.role !== 'admin') return false
+
+    const pepper = getPepper()
+    const valid = await bcrypt.compare(password + pepper + email, user.passwordHash)
+    if (!valid) return false
+
+    const sessionHash = await computeSessionHash(password, email, user.salt)
+
+    const cookieStore = await cookies()
+    cookieStore.set(COOKIE_NAME, sessionHash, COOKIE_OPTIONS)
+
+    return true
+  } catch (error) {
+    console.error('Login error:', error)
+    return false
   }
 }
 
-export async function getAdminSession() {
-  const cookieStore = await cookies()
-  const token = cookieStore.get('admin-token')?.value
-  if (!token) return null
-  return verifyAdminToken(token)
-}
+export async function requireAuth(): Promise<void> {
+  try {
+    const cookieStore = await cookies()
+    const sessionHash = cookieStore.get(COOKIE_NAME)?.value
 
-export async function requireAdmin() {
-  const userId = await getAdminSession()
-  if (!userId) {
+    if (!sessionHash || sessionHash.length === 0) {
+      redirect('/admin/login')
+    }
+
+    // Verify cookie is a valid bcrypt hash (set by our login function)
+    if (!sessionHash.startsWith('$2')) {
+      redirect('/admin/login')
+    }
+
+    const user = await prisma.user.findUnique({
+      where: { email: 'admin@wappcart.local' },
+    })
+    if (!user || user.role !== 'admin') {
+      redirect('/admin/login')
+    }
+  } catch (error) {
+    // If it's a redirect, rethrow it
+    if (error instanceof Error && error.message === 'NEXT_REDIRECT') {
+      throw error
+    }
+    console.error('Auth check error:', error)
     redirect('/admin/login')
   }
-  return userId
+}
+
+export async function verifyAuth(): Promise<boolean> {
+  try {
+    const cookieStore = await cookies()
+    const sessionHash = cookieStore.get(COOKIE_NAME)?.value
+
+    if (!sessionHash || sessionHash.length === 0) return false
+    if (!sessionHash.startsWith('$2')) return false
+
+    const user = await prisma.user.findUnique({
+      where: { email: 'admin@wappcart.local' },
+    })
+    if (!user || user.role !== 'admin') return false
+
+    return true
+  } catch (error) {
+    console.error('Auth verification error:', error)
+    return false
+  }
+}
+
+export async function logout(): Promise<void> {
+  const cookieStore = await cookies()
+  cookieStore.set(COOKIE_NAME, '', { ...COOKIE_OPTIONS, maxAge: 0 })
+  redirect('/admin/login')
 }

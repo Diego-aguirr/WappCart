@@ -2,7 +2,7 @@
 
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
-import { requireAdmin } from '@/lib/admin-auth'
+import { requireAuth } from '@/lib/admin-auth'
 import { createProduct, updateProduct, deleteProduct, toggleAvailability } from '@/lib/products'
 import { z } from 'zod'
 
@@ -34,7 +34,7 @@ export async function createProductAction(
   _prevState: ActionState,
   formData: FormData
 ): Promise<ActionState> {
-  await requireAdmin()
+  await requireAuth()
 
   const data = Object.fromEntries(formData)
   const result = ProductSchema.safeParse(data)
@@ -58,7 +58,7 @@ export async function updateProductAction(
   _prevState: ActionState,
   formData: FormData
 ): Promise<ActionState> {
-  await requireAdmin()
+  await requireAuth()
 
   const data = Object.fromEntries(formData)
   const result = ProductSchema.safeParse(data)
@@ -78,7 +78,7 @@ export async function updateProductAction(
 }
 
 export async function deleteProductAction(id: string): Promise<ActionState> {
-  await requireAdmin()
+  await requireAuth()
 
   try {
     await deleteProduct(id)
@@ -94,7 +94,7 @@ export async function toggleProductAvailability(
   _prevState: ActionState,
   formData: FormData
 ): Promise<ActionState> {
-  await requireAdmin()
+  await requireAuth()
 
   const id = formData.get('id') as string
   if (!id) return { error: 'Product ID missing' }
