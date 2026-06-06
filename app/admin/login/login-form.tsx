@@ -9,7 +9,7 @@ export default function LoginForm({
 }: {
   action: (state: LoginState, payload: FormData) => Promise<LoginState>
 }) {
-  const [state, formAction] = useActionState(action, null)
+  const [state, formAction, isPending] = useActionState(action, null)
 
   return (
     <form action={formAction} className="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
@@ -24,7 +24,8 @@ export default function LoginForm({
             name="email"
             type="email"
             required
-            className="w-full border rounded px-3 py-2"
+            disabled={isPending}
+            className="w-full border rounded px-3 py-2 disabled:bg-gray-100"
           />
         </div>
         <div>
@@ -36,15 +37,21 @@ export default function LoginForm({
             name="password"
             type="password"
             required
-            className="w-full border rounded px-3 py-2"
+            disabled={isPending}
+            className="w-full border rounded px-3 py-2 disabled:bg-gray-100"
           />
         </div>
-        {state?.error && <p className="text-red-600 text-sm">{state.error}</p>}
+        {state?.error && (
+          <div className="bg-red-50 border border-red-200 rounded p-3">
+            <p className="text-red-600 text-sm">{state.error}</p>
+          </div>
+        )}
         <button
           type="submit"
-          className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700"
+          disabled={isPending}
+          className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 disabled:bg-blue-400 disabled:cursor-not-allowed"
         >
-          Login
+          {isPending ? 'Ingresando...' : 'Login'}
         </button>
       </div>
     </form>

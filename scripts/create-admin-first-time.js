@@ -48,7 +48,7 @@ async function main() {
     }
 
     const salt = await bcrypt.genSalt(SALT_ROUNDS)
-    const passwordHash = await bcrypt.hash(password, salt)
+    const passwordHash = await bcrypt.hash(password + pepper + email, salt)
 
     await prisma.user.create({
       data: {

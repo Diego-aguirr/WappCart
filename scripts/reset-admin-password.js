@@ -46,7 +46,7 @@ async function main() {
     }
 
     const salt = await bcrypt.genSalt(SALT_ROUNDS)
-    const passwordHash = await bcrypt.hash(newPassword, salt)
+    const passwordHash = await bcrypt.hash(newPassword + pepper + ADMIN_EMAIL, salt)
 
     await prisma.user.update({
       where: { email: ADMIN_EMAIL },

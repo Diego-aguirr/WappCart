@@ -3,6 +3,10 @@ import bcrypt from 'bcryptjs'
 
 const prisma = new PrismaClient()
 
+const ADMIN_EMAIL = 'admin@wappcart.local'
+const ADMIN_PASSWORD = 'admin123'
+const ADMIN_PEPPER = process.env.ADMIN_PEPPER || 'wappcart-pepper-change-in-production-32chars'
+
 async function main() {
   await prisma.product.deleteMany({})
   await prisma.user.deleteMany({})
@@ -57,13 +61,16 @@ async function main() {
     ],
   })
 
-  const hashedPassword = await bcrypt.hash('admin123', 10)
+  const salt = await bcrypt.genSalt(12)
+  const passwordHash = await bcrypt.hash(ADMIN_PASSWORD + ADMIN_PEPPER + ADMIN_EMAIL, salt)
+
   await prisma.user.upsert({
-    where: { email: 'admin@wappcart.com' },
+    where: { email: ADMIN_EMAIL },
     update: {},
     create: {
-      email: 'admin@wappcart.com',
-      password: hashedPassword,
+      email: ADMIN_EMAIL,
+      passwordHash,
+      salt,
       role: 'admin',
     },
   })
