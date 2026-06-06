@@ -21,9 +21,10 @@ model Product {
 }
 
 model User {
-  id        String   @id @default(uuid())
-  email     String   @unique
-  password  String
-  role      String   @default("admin")
-  createdAt DateTime @default(now())
+  id           String   @id @default(uuid())
+  email        String   @unique
+  passwordHash String
+  salt         String
+  role         String   @default("admin")
+  createdAt    DateTime @default(now())
 }

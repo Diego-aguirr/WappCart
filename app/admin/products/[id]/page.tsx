@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation'
 import { getProductById } from '@/lib/products'
-import { requireAdmin } from '@/lib/admin-auth'
+import { requireAuth } from '@/lib/admin-auth'
 import ProductForm from '../product-form'
 import Link from 'next/link'
 
@@ -9,7 +9,7 @@ export default async function EditProductPage({
 }: {
   params: Promise<{ id: string }>
 }) {
-  await requireAdmin()
+  await requireAuth()
 
   const { id } = await params
   const product = await getProductById(id)

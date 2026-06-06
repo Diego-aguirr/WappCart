@@ -1,9 +1,9 @@
-import { requireAdmin } from '@/lib/admin-auth'
+import { requireAuth } from '@/lib/admin-auth'
 import ProductForm from '../product-form'
 import Link from 'next/link'
 
 export default async function NewProductPage() {
-  await requireAdmin()
+  await requireAuth()
 
   return (
     <div className="min-h-screen bg-gray-50 p-8">
