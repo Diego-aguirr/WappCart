@@ -2,7 +2,7 @@
 
 import Image from 'next/image'
 import { useCart } from '@/lib/cart-context'
-import { submitOrder } from '@/app/actions/order'
+import { submitOrder } from './actions'
 import { useState } from 'react'
 import Link from 'next/link'
 import { formatPrice } from '@/lib/format'
