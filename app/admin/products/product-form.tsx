@@ -231,7 +231,7 @@ export default function ProductForm({ id, defaultValues }: ProductFormProps) {
       <button
         type="submit"
         disabled={isPending}
-        className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 disabled:opacity-50"
+        className="w-full bg-neutral-900 text-white font-bold py-3 rounded-xl hover:bg-black active:scale-[0.98] disabled:opacity-50 transition-all"
       >
         {defaultValues ? 'Update Product' : 'Create Product'}
       </button>

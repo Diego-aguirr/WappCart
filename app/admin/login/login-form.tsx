@@ -49,7 +49,7 @@ export default function LoginForm({
         <button
           type="submit"
           disabled={isPending}
-          className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 disabled:bg-blue-400 disabled:cursor-not-allowed"
+          className="w-full bg-neutral-900 text-white font-bold py-3 rounded-xl hover:bg-black active:scale-[0.98] disabled:opacity-50 transition-all"
         >
           {isPending ? 'Ingresando...' : 'Login'}
         </button>

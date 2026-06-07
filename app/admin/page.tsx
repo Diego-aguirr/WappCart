@@ -16,7 +16,7 @@ export default async function AdminPage() {
           <h1 className="text-3xl font-bold">Admin Panel</h1>
           <Link
             href="/admin/products/new"
-            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+            className="bg-neutral-900 text-white px-4 py-2 rounded-lg hover:bg-black transition-colors"
           >
             Add Product
           </Link>
@@ -66,7 +66,7 @@ export default async function AdminPage() {
               <div className="flex items-center gap-1">
                 <Link
                   href={`/admin/products/${product.id}`}
-                  className="text-xs bg-gray-100 hover:bg-gray-200 px-2 py-1 rounded transition-colors"
+                  className="text-xs bg-neutral-100 text-neutral-700 hover:bg-neutral-200 px-2 py-1 rounded transition-colors"
                   title="Edit"
                 >
                   Edit
