@@ -2,9 +2,12 @@
 
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
+import { cookies } from 'next/headers'
 import { requireAuth } from '@/lib/admin-auth'
 import { createProduct, updateProduct, deleteProduct, toggleAvailability } from '@/lib/products'
 import { z } from 'zod'
+
+const COOKIE_NAME = 'admin-session'
 
 const checkboxBoolean = z.preprocess(
   (val) => {
@@ -29,6 +32,17 @@ export type ActionState =
   | { error: string | Record<string, string[]> }
   | { success: boolean }
   | null
+
+export async function logoutAction() {
+  const cookieStore = await cookies()
+  cookieStore.set(COOKIE_NAME, '', {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'strict',
+    maxAge: 0,
+    path: '/',
+  })
+}
 
 export async function createProductAction(
   _prevState: ActionState,
