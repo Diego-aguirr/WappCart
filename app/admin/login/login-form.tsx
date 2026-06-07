@@ -25,7 +25,7 @@ export default function LoginForm({
             type="email"
             required
             disabled={isPending}
-            className="w-full border rounded px-3 py-2 disabled:bg-gray-100"
+            className="w-full border border-neutral-200 rounded-lg px-3 py-2 focus:ring-2 focus:ring-neutral-900/10 focus:border-neutral-400 outline-none disabled:bg-gray-100 transition-all duration-200"
           />
         </div>
         <div>
@@ -38,7 +38,7 @@ export default function LoginForm({
             type="password"
             required
             disabled={isPending}
-            className="w-full border rounded px-3 py-2 disabled:bg-gray-100"
+            className="w-full border border-neutral-200 rounded-lg px-3 py-2 focus:ring-2 focus:ring-neutral-900/10 focus:border-neutral-400 outline-none disabled:bg-gray-100 transition-all duration-200"
           />
         </div>
         {state?.error && (
@@ -49,7 +49,7 @@ export default function LoginForm({
         <button
           type="submit"
           disabled={isPending}
-          className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 disabled:bg-blue-400 disabled:cursor-not-allowed"
+          className="w-full bg-neutral-900 text-white font-bold py-3 rounded-xl hover:bg-black active:scale-[0.98] disabled:opacity-50 transition-all"
         >
           {isPending ? 'Ingresando...' : 'Login'}
         </button>

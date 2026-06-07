@@ -3,6 +3,7 @@ import { getAllProducts } from '@/lib/products'
 import { requireAuth } from '@/lib/admin-auth'
 import DeleteProductButton from './products/delete-button'
 import ToggleAvailabilityButton from './products/toggle-availability'
+import LogoutButton from './logout-button'
 
 export default async function AdminPage() {
   await requireAuth()
@@ -14,12 +15,15 @@ export default async function AdminPage() {
       <div className="w-full max-w-5xl mx-auto">
         <div className="flex justify-between items-center mb-2">
           <h1 className="text-3xl font-bold">Admin Panel</h1>
-          <Link
-            href="/admin/products/new"
-            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
-          >
-            Add Product
-          </Link>
+          <div className="flex items-center gap-2">
+            <LogoutButton />
+            <Link
+              href="/admin/products/new"
+              className="bg-neutral-900 text-white px-4 py-2 rounded-lg hover:bg-black transition-colors"
+            >
+              Add Product
+            </Link>
+          </div>
         </div>
         <p className="text-xs text-gray-500 mb-6">
           Status: On = visible in menu, Off = hidden from customers
@@ -66,7 +70,7 @@ export default async function AdminPage() {
               <div className="flex items-center gap-1">
                 <Link
                   href={`/admin/products/${product.id}`}
-                  className="text-xs bg-gray-100 hover:bg-gray-200 px-2 py-1 rounded transition-colors"
+                  className="text-xs bg-neutral-100 text-neutral-700 hover:bg-neutral-200 px-2 py-1 rounded transition-colors"
                   title="Edit"
                 >
                   Edit

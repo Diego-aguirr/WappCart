@@ -2,8 +2,10 @@
 
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
+import { cookies } from 'next/headers'
 import { requireAuth } from '@/lib/admin-auth'
 import { createProduct, updateProduct, deleteProduct, toggleAvailability } from '@/lib/products'
+import { COOKIE_NAME, COOKIE_OPTIONS } from '@/lib/constants'
 import { z } from 'zod'
 
 const checkboxBoolean = z.preprocess(
@@ -19,7 +21,7 @@ const ProductSchema = z.object({
   name: z.string().min(1).max(100),
   slug: z.string().min(1).max(100),
   description: z.string().min(1).max(500),
-  price: z.coerce.number().positive(),
+  price: z.coerce.number().min(0, 'El precio no puede ser negativo'),
   image: z.string().min(1, 'Image is required'),
   category: z.string().min(1),
   available: checkboxBoolean,
@@ -29,6 +31,11 @@ export type ActionState =
   | { error: string | Record<string, string[]> }
   | { success: boolean }
   | null
+
+export async function logoutAction() {
+  const cookieStore = await cookies()
+  cookieStore.set(COOKIE_NAME, '', { ...COOKIE_OPTIONS, maxAge: 0 })
+}
 
 export async function createProductAction(
   _prevState: ActionState,

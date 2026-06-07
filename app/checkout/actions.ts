@@ -2,7 +2,7 @@
 
 import { z } from 'zod'
 import type { CartItem } from '@/lib/types'
-import { checkRateLimit, sanitizeString } from '@/lib/security'
+import { sanitizeString } from '@/lib/security'
 
 const OrderSchema = z.object({
   customerName: z.string()
@@ -12,13 +12,15 @@ const OrderSchema = z.object({
     .refine(val => !/[<>]/.test(val), 'El nombre contiene caracteres no permitidos'),
   
   phone: z.string()
-    .regex(/^\+?\d{10,15}$/, 'Teléfono inválido'),
+    .regex(/^\+?[\d\s\-()]{8,15}$/, 'Teléfono inválido'),
   
   address: z.string()
     .min(5, 'Dirección requerida')
     .max(200, 'Dirección demasiado larga')
     .trim()
     .refine(val => !/[<>]/.test(val), 'La dirección contiene caracteres no permitidos'),
+  
+  paymentMethod: z.enum(['efectivo', 'transferencia']),
   
   notes: z.string()
     .max(500)
@@ -33,14 +35,18 @@ function generateMessage(
   address: string,
   items: CartItem[],
   total: number,
+  paymentMethod: string,
   notes?: string
 ): string {
+  const paymentLabel = paymentMethod === 'efectivo' ? '💵 Efectivo' : '🏦 Transferencia'
+  
   const lines = [
     '🛒 *Nuevo Pedido - WappCart*',
     '',
     `👤 *Nombre:* ${name}`,
     `📱 *Teléfono:* ${phone}`,
     `📍 *Dirección:* ${address}`,
+    `💳 *Pago:* ${paymentLabel}`,
     '',
     '📋 *Productos:*',
     ...items.map(i => `  • ${i.quantity}x ${i.product.name} — $${(i.product.price * i.quantity).toLocaleString('es-AR')}`),
@@ -71,6 +77,7 @@ export async function submitOrder(
     customerName: sanitizeString(result.data.customerName),
     phone: sanitizeString(result.data.phone),
     address: sanitizeString(result.data.address),
+    paymentMethod: result.data.paymentMethod,
     notes: result.data.notes ? sanitizeString(result.data.notes) : undefined,
   }
 
@@ -83,6 +90,7 @@ export async function submitOrder(
     sanitizedData.address,
     items,
     total,
+    sanitizedData.paymentMethod,
     sanitizedData.notes
   )
 

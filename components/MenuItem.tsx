@@ -2,10 +2,7 @@
 
 import { useCart } from '@/lib/cart-context'
 import type { Product } from '@/lib/types'
-
-function formatPrice(price: number): string {
-  return new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 }).format(price)
-}
+import { formatPrice } from '@/lib/format'
 
 export function MenuItem({ product }: { product: Product }) {
   const { items, addItem, updateQty, removeItem } = useCart()
@@ -47,21 +44,24 @@ export function MenuItem({ product }: { product: Product }) {
           <button
             onClick={() => product.available && addItem(product)}
             disabled={!product.available}
+            aria-label={`Agregar ${product.name} al carrito`}
             className="bg-neutral-900 text-white text-sm font-semibold px-4 py-2 rounded-xl hover:bg-black active:scale-95 disabled:bg-neutral-200 disabled:text-neutral-400 disabled:cursor-not-allowed transition-all"
           >
             Agregar
           </button>
         ) : (
-          <div className="flex items-center gap-2 bg-neutral-100 rounded-xl px-1.5 py-1.5">
+          <div className="flex items-center gap-2 bg-neutral-100 rounded-xl px-1.5 py-1.5" role="group" aria-label={`Cantidad de ${product.name}`}>
             <button
               onClick={() => quantity === 1 ? removeItem(product.id) : updateQty(product.id, quantity - 1)}
+              aria-label={`Reducir cantidad de ${product.name}`}
               className="w-8 h-8 flex items-center justify-center rounded-lg bg-white text-neutral-700 hover:bg-neutral-50 text-sm font-bold shadow-sm"
             >
               −
             </button>
-            <span className="text-sm font-bold w-5 text-center">{quantity}</span>
+            <span className="text-sm font-bold w-5 text-center" aria-live="polite" aria-atomic="true">{quantity}</span>
             <button
               onClick={() => updateQty(product.id, quantity + 1)}
+              aria-label={`Aumentar cantidad de ${product.name}`}
               className="w-8 h-8 flex items-center justify-center rounded-lg bg-white text-neutral-700 hover:bg-neutral-50 text-sm font-bold shadow-sm"
             >
               +

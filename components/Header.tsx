@@ -20,13 +20,13 @@ export function Header() {
         </Link>
 
         <div className="flex items-center gap-1">
-          <Link href="/admin" className="p-2 rounded-full hover:bg-neutral-100 transition-colors" title="Admin Panel">
-            <FaCog className="w-5 h-5 text-neutral-400 hover:text-neutral-600" />
+          <Link href="/admin" className="p-2 rounded-full hover:bg-neutral-100 transition-colors" aria-label="Panel de administración">
+            <FaCog className="w-5 h-5 text-neutral-400 hover:text-neutral-600" aria-hidden="true" />
           </Link>
-          <Link href="/checkout" className="relative p-2 rounded-full hover:bg-neutral-100 transition-colors">
-            <FaShoppingCart className="w-5 h-5 text-neutral-900" />
+          <Link href="/checkout" className="relative p-2 rounded-full hover:bg-neutral-100 transition-colors" aria-label={`Carrito de compras, ${count} artículos`}>
+            <FaShoppingCart className="w-5 h-5 text-neutral-900" aria-hidden="true" />
             {count > 0 && (
-              <span className="absolute -top-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white">
+              <span className="absolute -top-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white" aria-hidden="true">
                 {count}
               </span>
             )}
