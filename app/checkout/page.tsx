@@ -15,9 +15,13 @@ export default function CheckoutPage() {
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
 
-  async function handleSubmit(formData: FormData) {
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault()
     setLoading(true)
     setError('')
+
+    const form = e.currentTarget
+    const formData = new FormData(form)
     const result = await submitOrder(formData, items)
     
     if (!result.success) {
@@ -91,7 +95,7 @@ export default function CheckoutPage() {
       </div>
 
       {/* Formulario */}
-      <form action={handleSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit} className="space-y-4">
         <div>
           <label className="block text-sm font-medium mb-1">Nombre completo *</label>
           <input

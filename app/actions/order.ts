@@ -12,7 +12,7 @@ const OrderSchema = z.object({
     .refine(val => !/[<>]/.test(val), 'El nombre contiene caracteres no permitidos'),
   
   phone: z.string()
-    .regex(/^\+?\d{10,15}$/, 'Teléfono inválido'),
+    .regex(/^\+?[\d\s\-()]{8,15}$/, 'Teléfono inválido'),
   
   address: z.string()
     .min(5, 'Dirección requerida')
