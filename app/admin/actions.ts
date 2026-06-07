@@ -19,7 +19,7 @@ const ProductSchema = z.object({
   name: z.string().min(1).max(100),
   slug: z.string().min(1).max(100),
   description: z.string().min(1).max(500),
-  price: z.coerce.number().positive(),
+  price: z.coerce.number().min(0, 'El precio no puede ser negativo'),
   image: z.string().min(1, 'Image is required'),
   category: z.string().min(1),
   available: checkboxBoolean,

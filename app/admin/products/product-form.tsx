@@ -156,6 +156,7 @@ export default function ProductForm({ id, defaultValues }: ProductFormProps) {
           name="price"
           type="number"
           step="0.01"
+          min="0"
           required
           defaultValue={defaultValues?.price}
           className="w-full border rounded px-3 py-2"
