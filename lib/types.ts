@@ -13,12 +13,3 @@ export type CartItem = {
   product: Product
   quantity: number
 }
-
-export type Order = {
-  customerName: string
-  phone: string
-  address: string
-  notes?: string
-  items: CartItem[]
-  total: number
-}

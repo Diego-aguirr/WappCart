@@ -1,88 +1,3 @@
-import { z } from 'zod'
-
-// ============================================================================
-// Input Validation Schemas
-// ============================================================================
-
-export const ProductSchema = z.object({
-  name: z.string()
-    .min(1, 'El nombre es requerido')
-    .max(100, 'El nombre es muy largo')
-    .trim()
-    .refine(val => !/[<>]/.test(val), 'El nombre contiene caracteres no permitidos'),
-  
-  slug: z.string()
-    .min(1, 'El slug es requerido')
-    .max(100, 'El slug es muy largo')
-    .regex(/^[a-z0-9-]+$/, 'El slug solo puede contener letras, números y guiones'),
-  
-  description: z.string()
-    .min(1, 'La descripción es requerida')
-    .max(500, 'La descripción es muy larga')
-    .trim()
-    .refine(val => !/[<>]/.test(val), 'La descripción contiene caracteres no permitidos'),
-  
-  price: z.coerce.number()
-    .positive('El precio debe ser positivo')
-    .max(1000000, 'El precio es demasiado alto'),
-  
-  image: z.string()
-    .min(1, 'La imagen es requerida')
-    .refine(
-      val => val.startsWith('/api/uploads/') || val.startsWith('/Food/'),
-      'La imagen debe ser una ruta válida'
-    ),
-  
-  category: z.string()
-    .min(1, 'La categoría es requerida')
-    .max(50, 'La categoría es muy larga')
-    .trim()
-    .refine(val => !/[<>]/.test(val), 'La categoría contiene caracteres no permitidos'),
-  
-  available: z.preprocess(
-    (val) => {
-      if (typeof val === 'string') return val === 'true'
-      if (typeof val === 'boolean') return val
-      return val
-    },
-    z.boolean().default(true)
-  ),
-})
-
-export const OrderSchema = z.object({
-  customerName: z.string()
-    .min(1, 'El nombre es requerido')
-    .max(100, 'El nombre es muy largo')
-    .trim()
-    .refine(val => !/[<>]/.test(val), 'El nombre contiene caracteres no permitidos'),
-  
-  phone: z.string()
-    .min(1, 'El teléfono es requerido')
-    .regex(/^\+?\d{10,15}$/, 'El teléfono no es válido'),
-  
-  address: z.string()
-    .min(5, 'La dirección es requerida')
-    .max(200, 'La dirección es muy larga')
-    .trim()
-    .refine(val => !/[<>]/.test(val), 'La dirección contiene caracteres no permitidos'),
-  
-  notes: z.string()
-    .max(500, 'Las notas son muy largas')
-    .trim()
-    .optional()
-    .default(''),
-})
-
-export const LoginSchema = z.object({
-  email: z.string()
-    .email('El email no es válido')
-    .max(100, 'El email es muy largo'),
-  
-  password: z.string()
-    .min(8, 'La contraseña debe tener al menos 8 caracteres')
-    .max(100, 'La contraseña es muy larga'),
-})
-
 // ============================================================================
 // Sanitization Functions
 // ============================================================================
@@ -97,41 +12,6 @@ export function sanitizeString(input: string): string {
     .replace(/javascript:/gi, '') // Remove javascript: protocol
     .replace(/on\w+\s*=/gi, '') // Remove event handlers
     .trim()
-}
-
-/**
- * Sanitize an object's string values
- */
-export function sanitizeObject<T extends Record<string, unknown>>(obj: T): T {
-  const sanitized = { ...obj }
-  for (const [key, value] of Object.entries(sanitized)) {
-    if (typeof value === 'string') {
-      sanitized[key as keyof T] = sanitizeString(value) as T[keyof T]
-    }
-  }
-  return sanitized
-}
-
-/**
- * Validate and sanitize FormData
- */
-export function validateFormData(
-  formData: FormData,
-  schema: z.ZodSchema
-): { success: true; data: z.infer<typeof schema> } | { success: false; errors: Record<string, string[]> } {
-  const raw = Object.fromEntries(formData)
-  const result = schema.safeParse(raw)
-  
-  if (result.success) {
-    return { success: true, data: result.data }
-  }
-  
-  const errors: Record<string, string[]> = {}
-  for (const [field, issues] of Object.entries(result.error.flatten().fieldErrors)) {
-    errors[field] = issues as string[]
-  }
-  
-  return { success: false, errors }
 }
 
 // ============================================================================
@@ -177,38 +57,6 @@ export function getClientIp(request: Request): string {
     return forwarded.split(',')[0].trim()
   }
   return 'unknown'
-}
-
-// ============================================================================
-// CSRF Protection (Simple Token-based)
-// ============================================================================
-
-const csrfTokens = new Map<string, { token: string; expires: number }>()
-
-/**
- * Generate a CSRF token for a session
- */
-export function generateCsrfToken(sessionId: string): string {
-  const token = crypto.randomUUID()
-  const expires = Date.now() + 3600000 // 1 hour
-  
-  csrfTokens.set(sessionId, { token, expires })
-  return token
-}
-
-/**
- * Validate a CSRF token
- */
-export function validateCsrfToken(sessionId: string, token: string): boolean {
-  const stored = csrfTokens.get(sessionId)
-  
-  if (!stored) return false
-  if (stored.expires < Date.now()) {
-    csrfTokens.delete(sessionId)
-    return false
-  }
-  
-  return stored.token === token
 }
 
 // ============================================================================

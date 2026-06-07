@@ -2,7 +2,7 @@
 
 import { z } from 'zod'
 import type { CartItem } from '@/lib/types'
-import { checkRateLimit, sanitizeString } from '@/lib/security'
+import { sanitizeString } from '@/lib/security'
 
 const OrderSchema = z.object({
   customerName: z.string()

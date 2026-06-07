@@ -5,10 +5,7 @@ import { useCart } from '@/lib/cart-context'
 import { submitOrder } from '@/app/actions/order'
 import { useState } from 'react'
 import Link from 'next/link'
-
-function formatPrice(price: number): string {
-  return new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 }).format(price)
-}
+import { formatPrice } from '@/lib/format'
 
 export default function CheckoutPage() {
   const { items, total, count, updateQty, removeItem, clear } = useCart()

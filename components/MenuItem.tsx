@@ -2,10 +2,7 @@
 
 import { useCart } from '@/lib/cart-context'
 import type { Product } from '@/lib/types'
-
-function formatPrice(price: number): string {
-  return new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 }).format(price)
-}
+import { formatPrice } from '@/lib/format'
 
 export function MenuItem({ product }: { product: Product }) {
   const { items, addItem, updateQty, removeItem } = useCart()

@@ -5,9 +5,8 @@ import { redirect } from 'next/navigation'
 import { cookies } from 'next/headers'
 import { requireAuth } from '@/lib/admin-auth'
 import { createProduct, updateProduct, deleteProduct, toggleAvailability } from '@/lib/products'
+import { COOKIE_NAME, COOKIE_OPTIONS } from '@/lib/constants'
 import { z } from 'zod'
-
-const COOKIE_NAME = 'admin-session'
 
 const checkboxBoolean = z.preprocess(
   (val) => {
@@ -35,13 +34,7 @@ export type ActionState =
 
 export async function logoutAction() {
   const cookieStore = await cookies()
-  cookieStore.set(COOKIE_NAME, '', {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'strict',
-    maxAge: 0,
-    path: '/',
-  })
+  cookieStore.set(COOKIE_NAME, '', { ...COOKIE_OPTIONS, maxAge: 0 })
 }
 
 export async function createProductAction(

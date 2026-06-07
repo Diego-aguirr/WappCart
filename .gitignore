@@ -23,6 +23,9 @@ build
 openspec/
 .atl/
 
+# uploads
+uploads/
+
 # misc
 .DS_Store
 *.tsbuildinfo
