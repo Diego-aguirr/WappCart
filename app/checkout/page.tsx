@@ -98,7 +98,7 @@ export default function CheckoutPage() {
             type="text"
             name="customerName"
             required
-            className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none"
+            className="w-full px-3 py-2 border border-neutral-200 rounded-lg focus:ring-2 focus:ring-neutral-900/10 focus:border-neutral-400 outline-none transition-all duration-200"
             placeholder="Juan Pérez"
           />
         </div>
@@ -109,7 +109,7 @@ export default function CheckoutPage() {
             type="tel"
             name="phone"
             required
-            className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none"
+            className="w-full px-3 py-2 border border-neutral-200 rounded-lg focus:ring-2 focus:ring-neutral-900/10 focus:border-neutral-400 outline-none transition-all duration-200"
             placeholder="1123456789"
           />
         </div>
@@ -120,9 +120,21 @@ export default function CheckoutPage() {
             type="text"
             name="address"
             required
-            className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none"
+            className="w-full px-3 py-2 border border-neutral-200 rounded-lg focus:ring-2 focus:ring-neutral-900/10 focus:border-neutral-400 outline-none transition-all duration-200"
             placeholder="Av. Corrientes 1234, CABA"
           />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium mb-1">Forma de pago *</label>
+          <select
+            name="paymentMethod"
+            required
+            className="w-full px-3 py-2 border border-neutral-200 rounded-lg focus:ring-2 focus:ring-neutral-900/10 focus:border-neutral-400 outline-none transition-all duration-200 bg-white"
+          >
+            <option value="efectivo">Efectivo</option>
+            <option value="transferencia">Transferencia</option>
+          </select>
         </div>
 
         <div>
@@ -130,7 +142,7 @@ export default function CheckoutPage() {
           <textarea
             name="notes"
             rows={2}
-            className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none resize-none"
+            className="w-full px-3 py-2 border border-neutral-200 rounded-lg focus:ring-2 focus:ring-neutral-900/10 focus:border-neutral-400 outline-none resize-none transition-all duration-200"
             placeholder="Sin cebolla, timbre roto..."
           />
         </div>

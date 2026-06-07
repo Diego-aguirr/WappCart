@@ -25,7 +25,7 @@ export default function LoginForm({
             type="email"
             required
             disabled={isPending}
-            className="w-full border rounded px-3 py-2 disabled:bg-gray-100"
+            className="w-full border border-neutral-200 rounded-lg px-3 py-2 focus:ring-2 focus:ring-neutral-900/10 focus:border-neutral-400 outline-none disabled:bg-gray-100 transition-all duration-200"
           />
         </div>
         <div>
@@ -38,7 +38,7 @@ export default function LoginForm({
             type="password"
             required
             disabled={isPending}
-            className="w-full border rounded px-3 py-2 disabled:bg-gray-100"
+            className="w-full border border-neutral-200 rounded-lg px-3 py-2 focus:ring-2 focus:ring-neutral-900/10 focus:border-neutral-400 outline-none disabled:bg-gray-100 transition-all duration-200"
           />
         </div>
         {state?.error && (
