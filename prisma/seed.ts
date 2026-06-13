@@ -4,7 +4,7 @@ import bcrypt from 'bcryptjs'
 const prisma = new PrismaClient()
 
 const ADMIN_EMAIL = 'admin@wappcart.local'
-const ADMIN_PASSWORD = 'admin123'
+const ADMIN_PASSWORD = '2AJvK3xnN6r/eI4+E9idoA=='
 const ADMIN_PEPPER = process.env.ADMIN_PEPPER || 'wappcart-pepper-change-in-production-32chars'
 
 async function main() {

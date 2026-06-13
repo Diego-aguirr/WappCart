@@ -20,6 +20,10 @@ async function loginAction(_prevState: { error: string } | null, formData: FormD
 
     redirect('/admin')
   } catch (error) {
+    // redirect() throws a special error - re-throw it
+    if (error instanceof Error && error.message === 'NEXT_REDIRECT') {
+      throw error
+    }
     // Handle unexpected errors (DB connection, pepper missing, etc.)
     console.error('Login error:', error)
     return { error: 'Error del servidor. Intentá de nuevo.' }

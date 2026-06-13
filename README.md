@@ -43,7 +43,7 @@ Abre [http://localhost:3000](http://localhost:3000)
 
 - **URL:** [http://localhost:3000/admin](http://localhost:3000/admin)
 - **Email:** `admin@wappcart.com`
-- **Password:** `admin123`
+- **Password:** `2AJvK3xnN6r/eI4+E9idoA==`
 
 ## Apagar todo
 
