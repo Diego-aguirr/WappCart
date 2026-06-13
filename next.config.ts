@@ -3,17 +3,21 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   experimental: {
     serverActions: {
-      allowedOrigins: ['localhost:3000', '*.brs.devtunnels.ms'],
+      allowedOrigins: ['localhost:3000'],
     },
   },
   images: {
     remotePatterns: [
       {
         protocol: 'https',
+        hostname: 'res.cloudinary.com',
+      },
+      {
+        protocol: 'https',
         hostname: 'images.unsplash.com',
       },
     ],
   },
-} as any;
+};
 
 export default nextConfig;

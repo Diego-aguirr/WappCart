@@ -1,10 +1,7 @@
 import { NextResponse } from 'next/server'
-import { writeFile } from 'fs/promises'
-import { join } from 'path'
 import { verifyAuth } from '@/lib/admin-auth'
-import { validateFileUpload, sanitizeFilename, checkRateLimit, getClientIp, getSecurityHeaders } from '@/lib/security'
-
-const UPLOAD_DIR = join(process.cwd(), 'uploads')
+import { validateFileUpload, checkRateLimit, getClientIp, getSecurityHeaders } from '@/lib/security'
+import { uploadImage } from '@/lib/cloudinary'
 
 export async function POST(request: Request) {
   try {
@@ -45,21 +42,13 @@ export async function POST(request: Request) {
       )
     }
 
-    // Read file bytes
-    const bytes = await file.arrayBuffer()
-    const buffer = Buffer.from(bytes)
-
-    // Sanitize filename
-    const safeName = sanitizeFilename(file.name)
-    const filename = `${Date.now()}-${safeName}`
-    const filepath = join(UPLOAD_DIR, filename)
-
-    // Write file
-    await writeFile(filepath, buffer)
+    // Upload to Cloudinary
+    const result = await uploadImage(file)
 
     return NextResponse.json(
       {
-        url: `/api/uploads/${filename}`,
+        url: result.url,
+        publicId: result.publicId,
         message: 'Imagen subida exitosamente',
       },
       { headers: getSecurityHeaders() }

@@ -2,17 +2,17 @@
 
 ## Quick Reference
 
-| Stack | Choice |
-|-------|--------|
-| Framework | Next.js 16 (App Router) |
-| UI | React 19, Tailwind CSS 4 |
-| Language | TypeScript 5+ (strict) |
-| Package Manager | pnpm |
-| Database | PostgreSQL 16 + Prisma 5 |
-| Auth | Cookie Hash (bcrypt + pepper) |
-| Checkout | WhatsApp redirect |
-| Validation | Zod |
-| Images | Local uploads + Cloudinary (optional) |
+| Stack           | Choice                                |
+| --------------- | ------------------------------------- |
+| Framework       | Next.js 16 (App Router)               |
+| UI              | React 19, Tailwind CSS 4              |
+| Language        | TypeScript 5+ (strict)                |
+| Package Manager | pnpm                                  |
+| Database        | PostgreSQL 16 + Prisma 5              |
+| Auth            | Cookie Hash (bcrypt + pepper)         |
+| Checkout        | WhatsApp redirect                     |
+| Validation      | Zod                                   |
+| Images          | Local uploads + Cloudinary (optional) |
 
 ---
 
@@ -104,13 +104,13 @@ uploads/                    # User uploaded images (gitignored)
 
 ```typescript
 // Pages
-type Props = { params: Promise<{ slug: string }> }
+type Props = { params: Promise<{ slug: string }> };
 export default async function Page({ params }: Props) {
-  const { slug } = await params
+  const { slug } = await params;
 }
 
 // Cookies
-const cookieStore = await cookies()
+const cookieStore = await cookies();
 ```
 
 ### Proxy (was middleware.ts)
@@ -120,13 +120,13 @@ const cookieStore = await cookies()
 export function proxy(request: NextRequest) {
   // Redirect unknown routes to /menu
 }
-export const proxyConfig = { matcher: ['/((?!_next|static|favicon).*)'] }
+export const proxyConfig = { matcher: ["/((?!_next|static|favicon).*)"] };
 ```
 
 ### Server Actions
 
 ```typescript
-'use server'
+"use server";
 export async function submitOrder(formData: FormData, items: CartItem[]) {
   // 1. Validate with Zod
   // 2. Sanitize inputs
@@ -139,11 +139,11 @@ export async function submitOrder(formData: FormData, items: CartItem[]) {
 
 Every route should have:
 
-| File | Purpose |
-|------|---------|
-| `error.tsx` | Error boundary (`'use client'`) |
-| `not-found.tsx` | 404 UI |
-| `loading.tsx` | Loading skeleton |
+| File            | Purpose                         |
+| --------------- | ------------------------------- |
+| `error.tsx`     | Error boundary (`'use client'`) |
+| `not-found.tsx` | 404 UI                          |
+| `loading.tsx`   | Loading skeleton                |
 
 **Critical**: Do NOT wrap `redirect()` in try-catch.
 
@@ -167,10 +167,6 @@ COOKIE_OPTIONS = { httpOnly, secure, sameSite: 'strict', maxAge: 8h }
 ```
 
 ### Admin Credentials
-
-- Email: `admin@wappcart.local`
-- Password: `admin123`
-- Pepper: in `.env` (ADMIN_PEPPER, min 32 chars)
 
 ### Recovery Scripts
 

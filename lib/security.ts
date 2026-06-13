@@ -18,6 +18,11 @@ export function sanitizeString(input: string): string {
 // Rate Limiting (In-Memory)
 // ============================================================================
 
+// NOTE: In-memory rate limiting works for single-instance deployments (local dev, single server).
+// For serverless (Vercel), each function invocation has its own Map, so rate limits reset per request.
+// For production serverless, use: Vercel KV, Upstash Redis, or similar external store.
+// This implementation is sufficient for local development and single-server deployments.
+
 const rateLimitMap = new Map<string, number[]>()
 
 /**
