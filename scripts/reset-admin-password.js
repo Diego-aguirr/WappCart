@@ -9,12 +9,12 @@
  * Environment:
  *   DATABASE_URL  — PostgreSQL connection string
  *   ADMIN_PEPPER  — Server-side pepper (min 32 chars)
+ *   ADMIN_EMAIL   — Admin email address
  */
 
 const { PrismaClient } = require('@prisma/client')
 const bcrypt = require('bcryptjs')
 
-const ADMIN_EMAIL = 'admin@wappcart.local'
 const SALT_ROUNDS = 12
 
 async function main() {
@@ -36,24 +36,30 @@ async function main() {
     process.exit(1)
   }
 
+  const email = process.env.ADMIN_EMAIL
+  if (!email) {
+    console.error('ADMIN_EMAIL must be set in .env')
+    process.exit(1)
+  }
+
   const prisma = new PrismaClient()
 
   try {
-    const user = await prisma.user.findUnique({ where: { email: ADMIN_EMAIL } })
+    const user = await prisma.user.findUnique({ where: { email } })
     if (!user) {
-      console.error(`No user found with email ${ADMIN_EMAIL}. Create one first with create-admin-first-time.js`)
+      console.error(`No user found with email ${email}. Create one first with create-admin-first-time.js`)
       process.exit(1)
     }
 
     const salt = await bcrypt.genSalt(SALT_ROUNDS)
-    const passwordHash = await bcrypt.hash(newPassword + pepper + ADMIN_EMAIL, salt)
+    const passwordHash = await bcrypt.hash(newPassword + pepper + email, salt)
 
     await prisma.user.update({
-      where: { email: ADMIN_EMAIL },
+      where: { email },
       data: { passwordHash, salt },
     })
 
-    console.log(`Password reset successfully for ${ADMIN_EMAIL}`)
+    console.log(`Password reset successfully for ${email}`)
   } catch (error) {
     console.error('Failed to reset password:', error.message)
     process.exit(1)
