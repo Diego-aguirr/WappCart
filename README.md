@@ -42,8 +42,7 @@ Abre [http://localhost:3000](http://localhost:3000)
 ## Admin
 
 - **URL:** [http://localhost:3000/admin](http://localhost:3000/admin)
-- **Email:** `admin@wappcart.com`
-- **Password:** `2AJvK3xnN6r/eI4+E9idoA==`
+- Creá tu propio admin con: `node scripts/create-admin-first-time.js`
 
 ## Apagar todo
 
