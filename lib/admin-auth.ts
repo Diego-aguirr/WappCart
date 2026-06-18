@@ -59,8 +59,13 @@ export async function requireAuth(): Promise<void> {
       redirect('/admin/login')
     }
 
+    const adminEmail = process.env.ADMIN_EMAIL
+    if (!adminEmail) {
+      redirect('/admin/login')
+    }
+
     const user = await prisma.user.findUnique({
-      where: { email: 'admin@wappcart.local' },
+      where: { email: adminEmail },
     })
     if (!user || user.role !== 'admin') {
       redirect('/admin/login')
@@ -83,8 +88,11 @@ export async function verifyAuth(): Promise<boolean> {
     if (!sessionHash || sessionHash.length === 0) return false
     if (!sessionHash.startsWith('$2')) return false
 
+    const adminEmail = process.env.ADMIN_EMAIL
+    if (!adminEmail) return false
+
     const user = await prisma.user.findUnique({
-      where: { email: 'admin@wappcart.local' },
+      where: { email: adminEmail },
     })
     if (!user || user.role !== 'admin') return false
 

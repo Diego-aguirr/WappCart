@@ -3,11 +3,16 @@ import bcrypt from 'bcryptjs'
 
 const prisma = new PrismaClient()
 
-const ADMIN_EMAIL = 'admin@wappcart.local'
-const ADMIN_PASSWORD = '2AJvK3xnN6r/eI4+E9idoA=='
-const ADMIN_PEPPER = process.env.ADMIN_PEPPER || 'wappcart-pepper-change-in-production-32chars'
+const ADMIN_EMAIL = process.env.ADMIN_EMAIL
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD
+const ADMIN_PEPPER = process.env.ADMIN_PEPPER
 
 async function main() {
+  if (!ADMIN_EMAIL || !ADMIN_PASSWORD || !ADMIN_PEPPER) {
+    console.error('ADMIN_EMAIL, ADMIN_PASSWORD, and ADMIN_PEPPER must be set in .env')
+    process.exit(1)
+  }
+
   await prisma.product.deleteMany({})
   await prisma.user.deleteMany({})
 
