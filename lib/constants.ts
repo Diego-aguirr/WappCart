@@ -2,7 +2,9 @@ export const COOKIE_NAME = 'admin-session'
 
 export const COOKIE_OPTIONS = {
   httpOnly: true,
-  secure: process.env.NODE_ENV === 'production',
+  secure: process.env.COOKIE_SECURE
+    ? process.env.COOKIE_SECURE === 'true'
+    : process.env.NODE_ENV === 'production',
   sameSite: 'strict' as const,
   maxAge: 8 * 3600, // 8 hours
   path: '/',

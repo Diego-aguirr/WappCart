@@ -1,0 +1,58 @@
+# Dependencies
+node_modules
+.pnpm-store
+
+# Build output
+.next/
+out/
+build/
+
+# Environment files (none needed in image — provided via env_file at runtime)
+.env
+.env.*
+
+# Git
+.git/
+.gitignore
+
+# Uploads (mounted as volume, not baked in)
+uploads/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Testing
+coverage/
+
+# Debug logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# SDD artifacts
+openspec/
+.atl/
+.engram/
+
+# AI tools
+.cursor/
+.copilot/
+.claude/
+.opencode/
+AGENTS.md
+
+# Documentation
+*.md
+
+# Build artifacts
+*.tsbuildinfo
+next-env.d.ts
+.turbo/

@@ -2,17 +2,18 @@
 
 ## Quick Reference
 
-| Stack           | Choice                                |
-| --------------- | ------------------------------------- |
-| Framework       | Next.js 16 (App Router)               |
-| UI              | React 19, Tailwind CSS 4              |
-| Language        | TypeScript 5+ (strict)                |
-| Package Manager | pnpm                                  |
-| Database        | PostgreSQL 16 + Prisma 5              |
-| Auth            | Cookie Hash (bcrypt + pepper)         |
-| Checkout        | WhatsApp redirect                     |
-| Validation      | Zod                                   |
-| Images          | Local uploads + Cloudinary (optional) |
+| Stack | Choice |
+|-------|--------|
+| Framework | Next.js 16 (App Router) |
+| UI | React 19, Tailwind CSS 4 |
+| Language | TypeScript 5+ (strict) |
+| Package Manager | pnpm |
+| Database | PostgreSQL 16 + Prisma 5 |
+| Auth | Cookie Hash (bcrypt + pepper) |
+| Checkout | WhatsApp redirect |
+| Validation | Zod |
+| Images | Local uploads + Cloudinary (optional) |
+| Container | Docker + Docker Compose |
 
 ---
 
@@ -82,7 +83,9 @@ prisma/
 
 scripts/
 ├── create-admin-first-time.js   # Create first admin
-└── reset-admin-password.js      # Reset admin password
+├── reset-admin-password.js      # Reset admin password
+├── docker-entrypoint.sh         # Container startup script
+└── generate-pepper.sh           # Generate secure pepper
 
 uploads/                    # User uploaded images (gitignored)
 ```
@@ -93,6 +96,58 @@ uploads/                    # User uploaded images (gitignored)
 2. **Server First** — default to Server Components, `'use client'` only when needed
 3. **Minimal client JS** — every `'use client'` is a conscious decision
 4. **Type safety** — Zod schemas at boundaries, TypeScript everywhere else
+
+---
+
+## Docker Architecture
+
+### Files
+
+| File | Purpose |
+|------|---------|
+| `Dockerfile` | Multi-stage build (deps → builder → runner) |
+| `docker-compose.yml` | Base configuration (shared) |
+| `docker-compose.dev.yml` | Development overrides |
+| `docker-compose.prod.yml` | Production overrides |
+| `.dockerignore` | Build context exclusions |
+| `.env.docker` | Development environment |
+| `.env.prod` | Production environment (gitignored) |
+| `scripts/docker-entrypoint.sh` | Container startup script |
+
+### Dockerfile Stages
+
+```
+Stage 1 (deps):     Install dependencies, generate Prisma client
+Stage 2 (builder):  Build Next.js app with standalone output
+Stage 3 (runner):   Copy only what's needed, run as non-root
+```
+
+### Commands
+
+```bash
+# Development
+dcdev up --build
+dcdev down
+dcdev logs app
+
+# Production
+dcprod up --build -d
+dcprod down
+dcprod logs app
+```
+
+### Health Checks
+
+- **PostgreSQL**: `pg_isready -U wappcart -d wappcart`
+- **App**: `curl -f http://localhost:3000`
+
+### Environment Variables
+
+| Variable | Dev Value | Prod Value |
+|----------|-----------|------------|
+| DATABASE_URL | `postgresql://user:pass@db:5432/wappcart` | `postgresql://user:pass@db:5432/wappcart` |
+| COOKIE_SECURE | `false` | `true` |
+| NODE_ENV | `development` | `production` |
 
 ---
 
@@ -139,11 +194,11 @@ export async function submitOrder(formData: FormData, items: CartItem[]) {
 
 Every route should have:
 
-| File            | Purpose                         |
-| --------------- | ------------------------------- |
-| `error.tsx`     | Error boundary (`'use client'`) |
-| `not-found.tsx` | 404 UI                          |
-| `loading.tsx`   | Loading skeleton                |
+| File | Purpose |
+|------|---------|
+| `error.tsx` | Error boundary (`'use client'`) |
+| `not-found.tsx` | 404 UI |
+| `loading.tsx` | Loading skeleton |
 
 **Critical**: Do NOT wrap `redirect()` in try-catch.
 
@@ -294,3 +349,5 @@ model Product {
 6. WhatsApp is the checkout
 7. PostgreSQL is the database
 8. Simplicity over complexity
+9. Docker for portability
+10. Development and production parity
