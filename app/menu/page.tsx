@@ -2,6 +2,8 @@ import Image from 'next/image'
 import { getProducts } from '@/lib/products'
 import { MenuList } from '@/components/MenuList'
 
+export const dynamic = 'force-dynamic'
+
 export const metadata = {
   title: 'Menú | WappCart',
   description: 'Nuestro menú de comidas',

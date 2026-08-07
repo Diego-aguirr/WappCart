@@ -1,16 +1,33 @@
-version: '3.8'
+# Base docker-compose.yml — shared configuration
+# Dev:  docker compose -f docker-compose.yml -f docker-compose.dev.yml up --build
+# Prod: docker compose -f docker-compose.yml -f docker-compose.prod.yml up --build
+
 services:
   db:
     image: postgres:16-alpine
-    restart: none
+    restart: no
     environment:
       POSTGRES_USER: wappcart
       POSTGRES_PASSWORD: wappcart123
       POSTGRES_DB: wappcart
-    ports:
-      - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U wappcart -d wappcart"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  app:
+    build: .
+    env_file:
+      - .env.docker
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - uploads:/app/uploads
 
 volumes:
   postgres_data:
+  uploads:
